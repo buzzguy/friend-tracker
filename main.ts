@@ -853,10 +853,21 @@ class ContactPageView extends ItemView {
 						cls: "contact-interaction-item",
 					});
 
+					// Format date nicely, adjusting for timezone
+					const [year, month, day] = interaction.date
+						.split("-")
+						.map(Number);
+					const date = new Date(year, month - 1, day); // months are 0-based in JS
+					const formattedDate = date.toLocaleDateString(undefined, {
+						year: "numeric",
+						month: "short",
+						day: "numeric",
+					});
+
 					// Date
 					const dateEl = interactionEl.createEl("div", {
 						cls: "contact-interaction-date",
-						text: new Date(interaction.date).toLocaleDateString(),
+						text: formattedDate,
 					});
 
 					// Text
@@ -1056,7 +1067,16 @@ class ContactPageView extends ItemView {
 			this.app,
 			interaction,
 			async (date: string, text: string) => {
-				this.contactData.interactions[index] = { date, text };
+				if (!Array.isArray(this.contactData.interactions)) {
+					this.contactData.interactions = [];
+				}
+
+				// Keep the date as is since it's already in YYYY-MM-DD format
+				this.contactData.interactions[index] = {
+					date: date,
+					text: text,
+				};
+
 				await this.saveContactData();
 				this.render();
 			}

@@ -3,9 +3,8 @@
 	"name": "Friend Tracker",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Track your interactions with friends",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Keep track of friends, birthdays, and interactions",
+	"author": "Dan Au <dan@dausign.com>",
+	"authorUrl": "https://dausign.com",
 	"isDesktopOnly": false
 }
