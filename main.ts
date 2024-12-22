@@ -44,6 +44,12 @@ interface ContactWithCountdown extends Contact {
 	daysUntilBirthday: number | null;
 }
 
+// Add this interface for type safety
+interface Interaction {
+	date: string;
+	text: string;
+}
+
 export default class FriendTracker extends Plugin {
 	settings: FriendTrackerSettings;
 
@@ -740,10 +746,76 @@ class ContactPageView extends ItemView {
 			cls: "contact-interactions",
 		});
 		interactions.createEl("h2", { text: "Recent Interactions" });
-		const addInteraction = interactions.createEl("button", {
+
+		// Add interaction button
+		const addButton = interactions.createEl("button", {
 			text: "Add Interaction",
-			cls: "contact-add-interaction",
+			cls: "contact-add-interaction-button",
 		});
+		addButton.addEventListener("click", () => {
+			this.openAddInteractionModal();
+		});
+
+		// Display existing interactions
+		if (Array.isArray(this.contactData.interactions)) {
+			const interactionsList = interactions.createEl("div", {
+				cls: "contact-interactions-list",
+			});
+
+			// Sort interactions by date, most recent first
+			const sortedInteractions = [...this.contactData.interactions].sort(
+				(a, b) =>
+					new Date(b.date).getTime() - new Date(a.date).getTime()
+			);
+
+			sortedInteractions.forEach(
+				(interaction: Interaction, index: number) => {
+					const interactionEl = interactionsList.createEl("div", {
+						cls: "contact-interaction-item",
+					});
+
+					// Date
+					const dateEl = interactionEl.createEl("div", {
+						cls: "contact-interaction-date",
+						text: new Date(interaction.date).toLocaleDateString(),
+					});
+
+					// Text
+					const textEl = interactionEl.createEl("div", {
+						cls: "contact-interaction-text",
+						text: interaction.text,
+					});
+
+					// Actions
+					const actions = interactionEl.createEl("div", {
+						cls: "contact-interaction-actions",
+					});
+
+					// Edit button
+					const editBtn = actions.createEl("button", {
+						cls: "contact-interaction-edit",
+						attr: { "aria-label": "Edit interaction" },
+					});
+					setIcon(editBtn, "edit");
+
+					// Delete button
+					const deleteBtn = actions.createEl("button", {
+						cls: "contact-interaction-delete",
+						attr: { "aria-label": "Delete interaction" },
+					});
+					setIcon(deleteBtn, "trash");
+
+					// Event handlers
+					editBtn.addEventListener("click", () => {
+						this.openEditInteractionModal(index, interaction);
+					});
+
+					deleteBtn.addEventListener("click", () => {
+						this.deleteInteraction(index);
+					});
+				}
+			);
+		}
 	}
 
 	private createInfoField(
@@ -867,6 +939,44 @@ class ContactPageView extends ItemView {
 		});
 		modal.open();
 	}
+
+	private async openAddInteractionModal() {
+		const modal = new InteractionModal(
+			this.app,
+			null,
+			async (date: string, text: string) => {
+				if (!Array.isArray(this.contactData.interactions)) {
+					this.contactData.interactions = [];
+				}
+				this.contactData.interactions.push({ date, text });
+				await this.saveContactData();
+				this.render();
+			}
+		);
+		modal.open();
+	}
+
+	private async openEditInteractionModal(
+		index: number,
+		interaction: Interaction
+	) {
+		const modal = new InteractionModal(
+			this.app,
+			interaction,
+			async (date: string, text: string) => {
+				this.contactData.interactions[index] = { date, text };
+				await this.saveContactData();
+				this.render();
+			}
+		);
+		modal.open();
+	}
+
+	private async deleteInteraction(index: number) {
+		this.contactData.interactions.splice(index, 1);
+		await this.saveContactData();
+		this.render();
+	}
 }
 
 // Add this new modal class
@@ -913,5 +1023,75 @@ class AddFieldModal extends Modal {
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
+	}
+}
+
+// Add this new modal class for adding/editing interactions
+class InteractionModal extends Modal {
+	private interaction: Interaction | null;
+	private onSubmit: (date: string, text: string) => void;
+
+	constructor(
+		app: App,
+		interaction: Interaction | null,
+		onSubmit: (date: string, text: string) => void
+	) {
+		super(app);
+		this.interaction = interaction;
+		this.onSubmit = onSubmit;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.empty();
+
+		contentEl.createEl("h2", {
+			text: this.interaction ? "Edit Interaction" : "Add Interaction",
+		});
+
+		const form = contentEl.createEl("form");
+		form.addEventListener("submit", (e) => {
+			e.preventDefault();
+			const dateInput = form.querySelector(
+				"[type=date]"
+			) as HTMLInputElement;
+			const textInput = form.querySelector(
+				"textarea"
+			) as HTMLTextAreaElement;
+
+			if (dateInput?.value && textInput?.value) {
+				this.onSubmit(dateInput.value, textInput.value);
+				this.close();
+			}
+		});
+
+		// Date input
+		const dateInput = form.createEl("input", {
+			attr: {
+				type: "date",
+				value:
+					this.interaction?.date ||
+					new Date().toISOString().split("T")[0],
+				required: "true",
+			},
+			cls: "contact-interaction-date-input",
+		});
+
+		// Text input
+		const textInput = form.createEl("textarea", {
+			attr: {
+				placeholder: "What happened?",
+				required: "true",
+			},
+			cls: "contact-interaction-text-input",
+		});
+		textInput.value = this.interaction?.text || "";
+
+		// Submit button
+		form.createEl("button", {
+			text: this.interaction ? "Save Changes" : "Add Interaction",
+			attr: { type: "submit" },
+			cls: "contact-interaction-submit",
+		});
 	}
 }
