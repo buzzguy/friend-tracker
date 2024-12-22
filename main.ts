@@ -498,45 +498,37 @@ class FriendTrackerView extends ItemView {
 	}
 
 	async openAddContactModal() {
-		const modal = new AddContactModal(
-			this.app,
-			this.plugin,
-			async (name) => {
-				try {
-					await this.createNewContact(name);
-					modal.close();
-					// Wait a brief moment before refreshing to ensure file system events are settled
-					setTimeout(() => this.refresh(), 100);
-				} catch (error) {
-					new Notice(`Error creating contact: ${error}`);
-				}
+		const modal = new AddContactModal(this.app, async (contactData) => {
+			const fileName = `${contactData.name}.md`;
+			const filePath = `${this.plugin.settings.defaultFolder}/${fileName}`;
+
+			// Ensure all standard fields exist in YAML
+			const standardFields = {
+				name: contactData.name,
+				birthday: contactData.birthday || "",
+				email: contactData.email || "",
+				phone: contactData.phone || "",
+				address: contactData.address || "",
+				relationship: contactData.relationship || "",
+				notes: contactData.notes || "",
+			};
+
+			// Create YAML frontmatter
+			const yaml = Object.entries(standardFields)
+				.map(([key, value]) => `${key}: ${value}`)
+				.join("\n");
+
+			const fileContent = `---\n${yaml}\n---\n`;
+
+			try {
+				await this.app.vault.create(filePath, fileContent);
+				new Notice(`Created contact: ${contactData.name}`);
+				this.refresh();
+			} catch (error) {
+				new Notice(`Error creating contact: ${error}`);
 			}
-		);
+		});
 		modal.open();
-	}
-
-	async createNewContact(name: string) {
-		const folder = this.plugin.settings.defaultFolder;
-		const fileName = `${name}.md`;
-		const filePath = `${folder}/${fileName}`;
-
-		const content = [
-			"---",
-			`name: ${name}`,
-			"birthday:", // YYYY-MM-DD format
-			"email:",
-			"phone:",
-			"address:",
-			"relationship:",
-			"---",
-		].join("\n");
-
-		try {
-			await this.app.vault.create(filePath, content);
-			new Notice(`Created contact: ${name}`);
-		} catch (error) {
-			new Notice(`Error creating contact: ${error}`);
-		}
 	}
 
 	private async openDeleteModal(file: TFile) {
@@ -554,42 +546,106 @@ class FriendTrackerView extends ItemView {
 }
 
 class AddContactModal extends Modal {
-	plugin: FriendTracker;
-	onSubmit: (name: string) => void;
+	private onSubmit: (contactData: Record<string, string>) => void;
 
 	constructor(
 		app: App,
-		plugin: FriendTracker,
-		onSubmit: (name: string) => void
+		onSubmit: (contactData: Record<string, string>) => void
 	) {
 		super(app);
-		this.plugin = plugin;
 		this.onSubmit = onSubmit;
 	}
 
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
+
 		contentEl.createEl("h2", { text: "Add New Contact" });
 
-		const form = contentEl.createEl("form");
-		form.addEventListener("submit", async (e) => {
-			e.preventDefault();
-			const nameInput = form.querySelector("input");
-			if (nameInput?.value) {
-				await this.onSubmit(nameInput.value);
-				// Don't close here, let the caller handle it
-			}
+		const form = contentEl.createEl("form", {
+			cls: "friend-tracker-add-contact-form",
 		});
 
-		const nameInput = form.createEl("input", {
-			attr: { type: "text", placeholder: "Contact name" },
+		// Name field (required)
+		const nameField = form.createDiv({ cls: "friend-tracker-modal-field" });
+		nameField.createEl("label", { text: "Name *" });
+		const nameInput = nameField.createEl("input", {
+			attr: {
+				type: "text",
+				name: "name",
+				required: "true",
+				placeholder: "Contact name",
+			},
+			cls: "friend-tracker-modal-input",
 		});
 		nameInput.focus();
 
-		form.createEl("button", {
+		// Birthday field (optional)
+		const birthdayField = form.createDiv({
+			cls: "friend-tracker-modal-field",
+		});
+		birthdayField.createEl("label", { text: "Birthday" });
+		const birthdayInput = birthdayField.createEl("input", {
+			attr: {
+				type: "date",
+				name: "birthday",
+				placeholder: "YYYY-MM-DD",
+			},
+			cls: "friend-tracker-modal-input",
+		});
+
+		// Email field (optional)
+		const emailField = form.createDiv({
+			cls: "friend-tracker-modal-field",
+		});
+		emailField.createEl("label", { text: "Email" });
+		const emailInput = emailField.createEl("input", {
+			attr: {
+				type: "email",
+				name: "email",
+				placeholder: "email@example.com",
+			},
+			cls: "friend-tracker-modal-input",
+		});
+
+		// Phone field (optional)
+		const phoneField = form.createDiv({
+			cls: "friend-tracker-modal-field",
+		});
+		phoneField.createEl("label", { text: "Phone" });
+		const phoneInput = phoneField.createEl("input", {
+			attr: {
+				type: "tel",
+				name: "phone",
+				placeholder: "000-000-0000",
+			},
+			cls: "friend-tracker-modal-input",
+		});
+
+		// Submit button
+		const buttonContainer = form.createDiv({
+			cls: "friend-tracker-modal-buttons",
+		});
+		const submitButton = buttonContainer.createEl("button", {
 			text: "Add Contact",
 			attr: { type: "submit" },
+			cls: "friend-tracker-modal-submit",
+		});
+
+		form.addEventListener("submit", (e) => {
+			e.preventDefault();
+			const contactData: Record<string, string> = {
+				name: nameInput.value,
+			};
+
+			if (birthdayInput.value) contactData.birthday = birthdayInput.value;
+			if (emailInput.value) contactData.email = emailInput.value;
+			if (phoneInput.value) contactData.phone = phoneInput.value;
+
+			if (contactData.name) {
+				this.onSubmit(contactData);
+				this.close();
+			}
 		});
 	}
 
@@ -768,6 +824,7 @@ class ContactPageView extends ItemView {
 			"interactions",
 			"created",
 			"updated",
+			"notes",
 			...standardFields.map((f) => f.toLowerCase()),
 		];
 		Object.entries(this.contactData)

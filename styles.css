@@ -409,3 +409,48 @@ If your plugin does not need CSS, delete this file.
 .friend-tracker-name-cell {
 	cursor: pointer;
 }
+
+/* Modal Styles */
+.friend-tracker-modal-field {
+	margin-bottom: 16px;
+}
+
+.friend-tracker-modal-field label {
+	display: block;
+	margin-bottom: 4px;
+	color: var(--text-muted);
+	font-size: 0.9em;
+}
+
+.friend-tracker-modal-input {
+	width: 100%;
+	padding: 8px;
+	background: var(--background-modifier-form-field);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	color: var(--text-normal);
+}
+
+.friend-tracker-modal-input:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
+}
+
+.friend-tracker-modal-buttons {
+	margin-top: 24px;
+	display: flex;
+	justify-content: flex-end;
+}
+
+.friend-tracker-modal-submit {
+	padding: 8px 16px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.friend-tracker-add-contact-form {
+	margin-top: 16px;
+}
