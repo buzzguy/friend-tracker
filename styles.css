@@ -11,12 +11,34 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 20px;
+	margin-bottom: 32px;
+	padding: 12px 0;
+	border-bottom: 2px solid var(--background-modifier-border);
+}
+
+.friend-tracker-header h2 {
+	font-size: 0.75em;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--text-muted);
+	margin: 0;
 }
 
 .friend-tracker-add-button {
-	padding: 5px 10px;
+	padding: 6px 12px;
+	background-color: var(--background-modifier-border);
+	color: var(--text-normal);
+	border: none;
+	border-radius: 4px;
 	cursor: pointer;
+	font-size: 0.9em;
+	transition: all 0.2s ease;
+}
+
+.friend-tracker-add-button:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
 }
 
 .friend-tracker-empty-state {
@@ -32,7 +54,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 .friend-tracker-view tr {
-	cursor: pointer;
+	cursor: default;
 }
 
 .friend-tracker-view tr:hover {
@@ -309,4 +331,81 @@ If your plugin does not need CSS, delete this file.
 
 .contact-field-input[type="date"]:hover::-webkit-calendar-picker-indicator {
 	opacity: 1;
+}
+
+.contact-name-container {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.contact-name-input {
+	font-size: 2em;
+	font-weight: var(--font-bold);
+	background: transparent;
+	border: none;
+	color: var(--text-normal);
+	padding: 4px 0;
+	width: 100%;
+}
+
+.contact-name-input:hover {
+	background-color: var(--background-modifier-form-field);
+	border-radius: 4px;
+	padding: 4px 8px;
+	margin: -4px -8px;
+}
+
+.contact-name-input:focus {
+	background-color: var(--background-modifier-form-field);
+	border-radius: 4px;
+	padding: 4px 8px;
+	margin: -4px -8px;
+	outline: none;
+	box-shadow: 0 0 0 2px var(--background-modifier-border);
+}
+
+/* Notes Section */
+.contact-notes-section {
+	padding: 20px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.contact-notes-section h2 {
+	font-size: 1.1em;
+	color: var(--text-muted);
+	margin-bottom: 16px;
+}
+
+.contact-notes-input {
+	width: 100%;
+	min-height: 100px;
+	background: var(--background-modifier-form-field);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 12px;
+	color: var(--text-normal);
+	font-family: inherit;
+	font-size: 0.9em;
+	line-height: 1.6;
+	resize: none;
+	transition: border-color 0.15s ease;
+}
+
+.contact-notes-input:hover {
+	border-color: var(--text-muted);
+}
+
+.contact-notes-input:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
+}
+
+.contact-notes-input::placeholder {
+	color: var(--text-faint);
+	font-style: italic;
+}
+
+.friend-tracker-name-cell {
+	cursor: pointer;
 }

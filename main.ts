@@ -285,7 +285,18 @@ class FriendTrackerView extends ItemView {
 			// Create table rows
 			contacts.forEach((contact) => {
 				const row = table.createEl("tr");
-				row.createEl("td", { text: contact.name });
+
+				// Create name cell with click handler
+				const nameCell = row.createEl("td", {
+					cls: "friend-tracker-name-cell",
+					text: contact.name,
+				});
+				nameCell.addEventListener("click", (e) => {
+					e.stopPropagation(); // Stop event from bubbling
+					this.openContact(contact.file);
+				});
+
+				// Rest of the cells (no click handlers)
 				row.createEl("td", { text: contact.age?.toString() || "N/A" });
 				row.createEl("td", {
 					text: contact.formattedBirthday || "N/A",
@@ -298,24 +309,17 @@ class FriendTrackerView extends ItemView {
 				});
 				row.createEl("td", { text: contact.relationship || "N/A" });
 
-				// Add actions cell with both edit and delete buttons
+				// Actions cell
 				const actionsCell = row.createEl("td", {
 					cls: "friend-tracker-actions",
 				});
 
-				// Add delete button
+				// Delete button
 				const deleteButton = actionsCell.createEl("button", {
 					cls: "friend-tracker-delete-button",
 					attr: { "aria-label": "Remove contact" },
 				});
 				setIcon(deleteButton, "trash");
-
-				// Add click handlers
-				row.addEventListener("click", (e) => {
-					if (!(e.target as HTMLElement).closest("button")) {
-						this.openContact(contact.file);
-					}
-				});
 
 				deleteButton.addEventListener("click", (e) => {
 					e.stopPropagation();
@@ -696,11 +700,48 @@ class ContactPageView extends ItemView {
 			return;
 		}
 
-		// Create a custom interface
+		// Create a custom interface with editable name
 		const header = container.createEl("div", {
 			cls: "contact-page-header",
 		});
-		header.createEl("h1", { text: this.contactData.name });
+
+		// Create name container for flex layout
+		const nameContainer = header.createEl("div", {
+			cls: "contact-name-container",
+		});
+
+		// Add editable name input
+		const nameInput = nameContainer.createEl("input", {
+			cls: "contact-name-input",
+			attr: {
+				type: "text",
+				value: this.contactData.name || "",
+				placeholder: "Contact name",
+			},
+		});
+
+		// Handle name changes
+		nameInput.addEventListener("change", async () => {
+			if (!this.file) return;
+
+			const newName = nameInput.value.trim();
+			if (newName) {
+				this.contactData.name = newName;
+				await this.saveContactData();
+
+				// Update the file name to match the contact name
+				const newPath = `${this.file.parent.path}/${newName}.md`;
+				try {
+					await this.app.fileManager.renameFile(this.file, newPath);
+					new Notice(`Updated contact name`);
+				} catch (error) {
+					new Notice(`Error updating file name: ${error}`);
+				}
+			} else {
+				// Reset to previous name if empty
+				nameInput.value = this.contactData.name;
+			}
+		});
 
 		const infoSection = container.createEl("div", {
 			cls: "contact-info-section",
@@ -743,6 +784,41 @@ class ContactPageView extends ItemView {
 		addFieldButton.addEventListener("click", () => {
 			this.openAddFieldModal();
 		});
+
+		// Add notes section before interactions
+		const notesSection = container.createEl("div", {
+			cls: "contact-notes-section",
+		});
+		notesSection.createEl("h2", { text: "Notes" });
+
+		// Notes textarea
+		const notesInput = notesSection.createEl("textarea", {
+			cls: "contact-notes-input",
+			attr: {
+				placeholder:
+					"Add notes about family members, parents' names, or anything else you want to remember...",
+			},
+		});
+		notesInput.value = this.contactData.notes || "";
+
+		// Auto-resize textarea as content changes
+		notesInput.addEventListener("input", () => {
+			notesInput.style.height = "auto";
+			notesInput.style.height = notesInput.scrollHeight + "px";
+		});
+
+		// Save notes when changed
+		notesInput.addEventListener("change", async () => {
+			if (!this.file) return;
+			this.contactData.notes = notesInput.value;
+			await this.saveContactData();
+		});
+
+		// Trigger initial height adjustment
+		setTimeout(() => {
+			notesInput.style.height = "auto";
+			notesInput.style.height = notesInput.scrollHeight + "px";
+		}, 0);
 
 		// Interactions section
 		const interactions = container.createEl("div", {
