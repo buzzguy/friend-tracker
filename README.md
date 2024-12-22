@@ -1,94 +1,79 @@
-# Obsidian Sample Plugin
+# Friend Tracker for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+A plugin for Obsidian that helps you keep track of friends, family, and your interactions with them. Never forget a birthday or important detail about someone you care about.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Features
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+-   **Contact Management**: Easily create and manage contact profiles with essential information
+-   **Birthday Tracking**: Keep track of birthdays and see upcoming celebrations
+-   **Interaction Logging**: Record and date your interactions with people
+-   **Custom Fields**: Add custom fields to track any information that matters to you
+-   **Notes Section**: Keep detailed notes about family members, relationships, or any other important details
+-   **Smart Organization**: Sort contacts by name, age, or upcoming birthdays
 
-## First time developing plugins?
+## Usage
 
-Quick starting guide for new plugin devs:
+### Creating Contacts
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+1. Click the "Add Contact" button to create a new contact
+2. Fill in their basic information (name, birthday, email, phone)
+3. Add any custom fields you want to track
+4. Use the notes section for additional details
 
-## Releasing new releases
+### Tracking Interactions
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+1. Open a contact's profile
+2. Click "Add Interaction" to log a new interaction
+3. Enter the date and details of the interaction
+4. View interaction history in chronological order
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+### Managing Birthdays
 
-## Adding your plugin to the community plugin list
+-   The main view shows upcoming birthdays
+-   Sort by "Days Until Birthday" to see who's celebrating soon
+-   Birthdays are automatically calculated and displayed in a friendly format
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+### Custom Fields
 
-## How to use
+-   Add custom fields to track specific information
+-   Fields are saved in the contact's YAML frontmatter
+-   Easily edit or update field values
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+## Installation
 
-## Manually installing the plugin
+1. Open Obsidian Settings
+2. Go to Community Plugins and disable Safe Mode
+3. Click Browse and search for "Friend Tracker"
+4. Install the plugin and enable it
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+## Storage
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+All contact information is stored in markdown files with YAML frontmatter, making it:
 
-## Funding URL
+-   Portable
+-   Future-proof
+-   Easy to backup
+-   Compatible with other markdown tools
 
-You can include funding URLs where people who use your plugin can financially support it.
+## Support
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+If you encounter any issues or have feature requests, please visit the [GitHub repository](https://github.com/buzzguy/friend-tracker/issues).
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
+## Author
 
-If you have multiple URLs, you can also do:
+Created by [Dan Au](https://dausign.com)
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+## License
 
-## API Documentation
+MIT License - see LICENSE for details
 
-See https://github.com/obsidianmd/obsidian-api
+## Inspiration
+
+This plugin was inspired by [Scott Stockdale's article on maintaining meaningful friendships](https://entrepreneurscanparty.com/posts/how-to-be-a-more-awesome-friend). The core idea is that maintaining strong relationships requires a system for:
+
+-   Tracking important dates and milestones
+-   Recording meaningful interactions
+-   Remembering personal details
+-   Making regular meaningful touchpoints
+
+Friend Tracker helps implement these relationship-building practices in a simple, organized way within Obsidian.
