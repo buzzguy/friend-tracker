@@ -2,6 +2,19 @@
 
 A plugin for Obsidian that helps you keep track of friends, family, and your interactions with them. Never forget a birthday or important detail about someone you care about.
 
+## Inspiration
+
+This plugin was inspired by [Scott Stockdale's article on maintaining meaningful friendships](https://entrepreneurscanparty.com/posts/how-to-be-a-more-awesome-friend). The core idea is that maintaining strong relationships requires a system for:
+
+-   Tracking important dates and milestones
+-   Recording meaningful interactions
+-   Remembering personal details
+-   Making regular meaningful touchpoints
+
+Friend Tracker helps implement these relationship-building practices in a simple, organized way within Obsidian.
+
+![image](https://github.com/user-attachments/assets/0f8ef3de-6c18-4813-a87a-1a7d5d1a680f)
+
 ## Features
 
 -   **Contact Management**: Easily create and manage contact profiles with essential information
@@ -66,16 +79,3 @@ Created by [Dan Au](https://dausign.com)
 ## License
 
 MIT License - see LICENSE for details
-
-## Inspiration
-
-This plugin was inspired by [Scott Stockdale's article on maintaining meaningful friendships](https://entrepreneurscanparty.com/posts/how-to-be-a-more-awesome-friend). The core idea is that maintaining strong relationships requires a system for:
-
--   Tracking important dates and milestones
--   Recording meaningful interactions
--   Remembering personal details
--   Making regular meaningful touchpoints
-
-Friend Tracker helps implement these relationship-building practices in a simple, organized way within Obsidian.
-
-![image](https://github.com/user-attachments/assets/0f8ef3de-6c18-4813-a87a-1a7d5d1a680f)
