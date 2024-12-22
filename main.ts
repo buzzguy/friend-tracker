@@ -16,6 +16,7 @@ import { addIcon } from "obsidian";
 import { pencil, trash2 } from "lucide";
 
 const VIEW_TYPE_FRIEND_TRACKER = "friend-tracker-view";
+const VIEW_TYPE_CONTACT_PAGE = "contact-page-view";
 
 interface FriendTrackerSettings {
 	defaultFolder: string;
@@ -53,6 +54,12 @@ export default class FriendTracker extends Plugin {
 		this.registerView(
 			VIEW_TYPE_FRIEND_TRACKER,
 			(leaf) => new FriendTrackerView(leaf, this)
+		);
+
+		// Register the contact page view
+		this.registerView(
+			VIEW_TYPE_CONTACT_PAGE,
+			(leaf) => new ContactPageView(leaf, this)
 		);
 
 		// Add ribbon icon to open the Friend Tracker view
@@ -455,8 +462,26 @@ class FriendTrackerView extends ItemView {
 	}
 
 	async openContact(file: TFile) {
-		const leaf = this.app.workspace.getLeaf();
-		await leaf.openFile(file);
+		// Try to find an existing leaf with this contact
+		const leaves = this.app.workspace.getLeavesOfType(
+			VIEW_TYPE_CONTACT_PAGE
+		);
+		const existingLeaf = leaves.find(
+			(leaf) =>
+				(leaf.view as ContactPageView).getState().filePath === file.path
+		);
+
+		if (existingLeaf) {
+			this.app.workspace.revealLeaf(existingLeaf);
+			return;
+		}
+
+		// Open in new leaf
+		const leaf = this.app.workspace.getLeaf("tab");
+		await leaf.setViewState({
+			type: VIEW_TYPE_CONTACT_PAGE,
+			state: { filePath: file.path },
+		});
 	}
 
 	async onClose() {
@@ -626,5 +651,170 @@ class DeleteContactModal extends Modal {
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
+	}
+}
+
+class ContactPageView extends ItemView {
+	private file: TFile | null = null;
+	private contactData: any = {};
+
+	constructor(leaf: WorkspaceLeaf, private plugin: FriendTracker) {
+		super(leaf);
+	}
+
+	getViewType(): string {
+		return VIEW_TYPE_CONTACT_PAGE;
+	}
+
+	getDisplayText(): string {
+		return this.file?.basename || "Contact";
+	}
+
+	async onload() {
+		super.onload();
+	}
+
+	async setState(state: any, result: any) {
+		const file = this.app.vault.getAbstractFileByPath(state.filePath);
+		if (file instanceof TFile) {
+			await this.setFile(file);
+		}
+		await super.setState(state, result);
+	}
+
+	getState() {
+		return {
+			type: VIEW_TYPE_CONTACT_PAGE,
+			filePath: this.file?.path,
+		};
+	}
+
+	async setFile(file: TFile) {
+		this.file = file;
+		if (this.file) {
+			const content = await this.app.vault.read(this.file);
+			const match = content.match(/^---\n([\s\S]+?)\n---/);
+			this.contactData = match ? parseYaml(match[1]) : {};
+			this.render();
+		}
+	}
+
+	render() {
+		const container = this.containerEl.children[1];
+		container.empty();
+
+		if (!this.contactData || !this.contactData.name) {
+			container.createEl("div", {
+				text: "No contact data available",
+				cls: "contact-empty-state",
+			});
+			return;
+		}
+
+		// Create a custom interface
+		const header = container.createEl("div", {
+			cls: "contact-page-header",
+		});
+		header.createEl("h1", { text: this.contactData.name });
+
+		const infoSection = container.createEl("div", {
+			cls: "contact-info-section",
+		});
+
+		// Basic Info
+		const basicInfo = infoSection.createEl("div", {
+			cls: "contact-basic-info",
+		});
+		this.createInfoField(basicInfo, "Birthday", this.contactData.birthday);
+		this.createInfoField(basicInfo, "Email", this.contactData.email);
+		this.createInfoField(basicInfo, "Phone", this.contactData.phone);
+
+		// Interactions
+		const interactions = container.createEl("div", {
+			cls: "contact-interactions",
+		});
+		interactions.createEl("h2", { text: "Recent Interactions" });
+		const addInteraction = interactions.createEl("button", {
+			text: "Add Interaction",
+			cls: "contact-add-interaction",
+		});
+	}
+
+	private createInfoField(
+		container: HTMLElement,
+		label: string,
+		value: string
+	) {
+		const field = container.createEl("div", { cls: "contact-field" });
+		field.createEl("label", { text: label });
+
+		// Special handling for birthday field
+		if (label === "Birthday") {
+			const input = field.createEl("input", {
+				cls: "contact-field-input",
+				attr: {
+					type: "date", // Use HTML5 date input
+					value: value || "",
+					placeholder: "YYYY-MM-DD",
+				},
+			});
+
+			// Handle input changes for birthday
+			input.addEventListener("change", async () => {
+				if (!this.file) return;
+
+				// Format the date to YYYY-MM-DD
+				const date = input.valueAsDate;
+				const formattedDate = date
+					? date.toISOString().split("T")[0]
+					: input.value;
+
+				// Update the contact data
+				this.contactData[label.toLowerCase()] = formattedDate;
+				await this.saveContactData();
+			});
+		} else {
+			// Regular text input for other fields
+			const input = field.createEl("input", {
+				cls: "contact-field-input",
+				attr: {
+					type: "text",
+					value: value || "",
+					placeholder: "Not set",
+				},
+			});
+
+			// Handle input changes for other fields
+			input.addEventListener("change", async () => {
+				if (!this.file) return;
+				this.contactData[label.toLowerCase()] = input.value;
+				await this.saveContactData();
+			});
+		}
+	}
+
+	// Add this helper method to handle file saving
+	private async saveContactData() {
+		if (!this.file) return;
+
+		// Read the current file content
+		const content = await this.app.vault.read(this.file);
+
+		// Split the content into YAML front matter and the rest
+		const parts = content.split(/---\n([\s\S]+?)\n---/);
+
+		if (parts.length >= 3) {
+			// Update the YAML front matter
+			const newYaml = Object.entries(this.contactData)
+				.map(([key, value]) => `${key}: ${value}`)
+				.join("\n");
+
+			// Reconstruct the file content
+			const newContent = `---\n${newYaml}\n---${parts[2]}`;
+
+			// Save the file
+			await this.app.vault.modify(this.file, newContent);
+			new Notice(`Updated contact`);
+		}
 	}
 }

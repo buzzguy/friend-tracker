@@ -145,3 +145,71 @@ If your plugin does not need CSS, delete this file.
 	background-color: var(--background-modifier-error);
 	color: var(--text-on-accent);
 }
+
+.contact-page-header {
+	padding: 20px;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.contact-info-section {
+	padding: 20px;
+}
+
+.contact-field {
+	margin-bottom: 12px;
+	display: flex;
+	align-items: center;
+}
+
+.contact-field label {
+	width: 100px;
+	color: var(--text-muted);
+	flex-shrink: 0;
+}
+
+.contact-field-input {
+	flex: 1;
+	background: transparent;
+	border: none;
+	border-bottom: 1px solid var(--background-modifier-border);
+	color: var(--text-normal);
+	padding: 4px 0;
+}
+
+.contact-field-input:hover {
+	border-bottom-color: var(--text-muted);
+}
+
+.contact-field-input:focus {
+	border-bottom-color: var(--interactive-accent);
+	outline: none;
+}
+
+.contact-field-input::placeholder {
+	color: var(--text-faint);
+}
+
+.contact-interactions {
+	padding: 20px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.contact-field-input[type="date"] {
+	flex: 1;
+	background: transparent;
+	border: none;
+	border-bottom: 1px solid var(--background-modifier-border);
+	color: var(--text-normal);
+	padding: 4px 0;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+.contact-field-input[type="date"]::-webkit-calendar-picker-indicator {
+	filter: invert(0.5);
+	opacity: 0.6;
+}
+
+.contact-field-input[type="date"]:hover::-webkit-calendar-picker-indicator {
+	opacity: 1;
+}
