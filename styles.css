@@ -146,6 +146,7 @@ If your plugin does not need CSS, delete this file.
 	color: var(--text-on-accent);
 }
 
+/* Contact Page Styles */
 .contact-page-header {
 	padding: 20px;
 	border-bottom: 1px solid var(--background-modifier-border);
@@ -189,49 +190,10 @@ If your plugin does not need CSS, delete this file.
 	color: var(--text-faint);
 }
 
+/* Interactions Section */
 .contact-interactions {
 	padding: 20px;
 	border-top: 1px solid var(--background-modifier-border);
-}
-
-.contact-field-input[type="date"] {
-	flex: 1;
-	background: transparent;
-	border: none;
-	border-bottom: 1px solid var(--background-modifier-border);
-	color: var(--text-normal);
-	padding: 4px 0;
-	font-family: inherit;
-	font-size: inherit;
-}
-
-.contact-field-input[type="date"]::-webkit-calendar-picker-indicator {
-	filter: invert(0.5);
-	opacity: 0.6;
-}
-
-.contact-field-input[type="date"]:hover::-webkit-calendar-picker-indicator {
-	opacity: 1;
-}
-
-.contact-add-field-button {
-	margin-top: 16px;
-	padding: 8px 16px;
-	background-color: var(--interactive-accent);
-	color: var(--text-on-accent);
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
-	opacity: 0.8;
-}
-
-.contact-add-field-button:hover {
-	opacity: 1;
-}
-
-.contact-add-field-submit {
-	margin-top: 16px;
-	width: 100%;
 }
 
 .contact-interactions-list {
@@ -269,6 +231,24 @@ If your plugin does not need CSS, delete this file.
 	opacity: 1;
 }
 
+/* Buttons */
+.contact-add-field-button,
+.contact-add-interaction-button {
+	margin-top: 8px;
+	padding: 8px 16px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	opacity: 0.8;
+}
+
+.contact-add-field-button:hover,
+.contact-add-interaction-button:hover {
+	opacity: 1;
+}
+
 .contact-interaction-edit,
 .contact-interaction-delete {
 	background: none;
@@ -277,6 +257,9 @@ If your plugin does not need CSS, delete this file.
 	border-radius: 4px;
 	color: var(--text-muted);
 	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .contact-interaction-edit:hover {
@@ -289,21 +272,7 @@ If your plugin does not need CSS, delete this file.
 	background-color: var(--background-modifier-error-hover);
 }
 
-.contact-add-interaction-button {
-	margin-top: 8px;
-	padding: 8px 16px;
-	background-color: var(--interactive-accent);
-	color: var(--text-on-accent);
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
-	opacity: 0.8;
-}
-
-.contact-add-interaction-button:hover {
-	opacity: 1;
-}
-
+/* Modal Styles */
 .contact-interaction-text-input {
 	width: 100%;
 	min-height: 100px;
@@ -315,7 +284,29 @@ If your plugin does not need CSS, delete this file.
 	resize: vertical;
 }
 
-.contact-interaction-submit {
+.contact-interaction-submit,
+.contact-add-field-submit {
 	width: 100%;
 	margin-top: 16px;
+	padding: 8px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+/* Date Input Styles */
+.contact-field-input[type="date"] {
+	font-family: inherit;
+	font-size: inherit;
+}
+
+.contact-field-input[type="date"]::-webkit-calendar-picker-indicator {
+	filter: invert(0.5);
+	opacity: 0.6;
+}
+
+.contact-field-input[type="date"]:hover::-webkit-calendar-picker-indicator {
+	opacity: 1;
 }

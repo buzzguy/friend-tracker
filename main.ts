@@ -724,6 +724,9 @@ class ContactPageView extends ItemView {
 		// Then any custom fields (excluding internal fields)
 		const excludedFields = [
 			"name",
+			"interactions",
+			"created",
+			"updated",
 			...standardFields.map((f) => f.toLowerCase()),
 		];
 		Object.entries(this.contactData)
@@ -913,13 +916,26 @@ class ContactPageView extends ItemView {
 		const parts = content.split(/---\n([\s\S]+?)\n---/);
 
 		if (parts.length >= 3) {
-			// Update the YAML front matter
-			const newYaml = Object.entries(this.contactData)
-				.map(([key, value]) => `${key}: ${value}`)
-				.join("\n");
+			// Format the YAML content properly
+			const yamlLines = Object.entries(this.contactData).map(
+				([key, value]) => {
+					// Special handling for interactions array
+					if (key === "interactions" && Array.isArray(value)) {
+						const interactionsYaml = value
+							.map(
+								(interaction) =>
+									`  - date: "${interaction.date}"\n    text: "${interaction.text}"`
+							)
+							.join("\n");
+						return `${key}:\n${interactionsYaml}`;
+					}
+					// Regular fields
+					return `${key}: ${value}`;
+				}
+			);
 
 			// Reconstruct the file content
-			const newContent = `---\n${newYaml}\n---${parts[2]}`;
+			const newContent = `---\n${yamlLines.join("\n")}\n---${parts[2]}`;
 
 			// Save the file
 			await this.app.vault.modify(this.file, newContent);
