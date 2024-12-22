@@ -1,3 +1,5 @@
+![image](https://github.com/user-attachments/assets/0f8ef3de-6c18-4813-a87a-1a7d5d1a680f)
+
 # Friend Tracker for Obsidian
 
 A plugin for Obsidian that helps you keep track of friends, family, and your interactions with them. Never forget a birthday or important detail about someone you care about.
