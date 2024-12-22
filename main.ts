@@ -10,7 +10,10 @@ import {
 	WorkspaceLeaf,
 	parseYaml,
 	Modal,
+	setIcon,
 } from "obsidian";
+import { addIcon } from "obsidian";
+import { pencil, trash2 } from "lucide";
 
 const VIEW_TYPE_FRIEND_TRACKER = "friend-tracker-view";
 
@@ -222,37 +225,48 @@ class FriendTrackerView extends ItemView {
 			const columns: Array<{
 				key: keyof Omit<ContactWithCountdown, "file">;
 				label: string;
+				sortable?: boolean;
 			}> = [
-				{ key: "name", label: "Name" },
-				{ key: "age", label: "Age" },
-				{ key: "formattedBirthday", label: "Birthday" },
-				{ key: "daysUntilBirthday", label: "Days Until Birthday" },
-				{ key: "relationship", label: "Relationship" },
+				{ key: "name", label: "Name", sortable: true },
+				{ key: "age", label: "Age", sortable: true },
+				{ key: "formattedBirthday", label: "Birthday", sortable: true },
+				{
+					key: "daysUntilBirthday",
+					label: "Days Until Birthday",
+					sortable: true,
+				},
+				{ key: "relationship", label: "Relationship", sortable: true },
+				{ key: "name", label: "", sortable: false }, // Empty label for actions column
 			];
 
-			columns.forEach(({ key, label }) => {
+			columns.forEach(({ key, label, sortable }) => {
 				const th = headerRow.createEl("th");
-				const button = th.createEl("button", {
-					cls: "friend-tracker-sort-button",
-				});
 
-				// Add text span
-				button.createEl("span", { text: label });
+				if (sortable) {
+					const button = th.createEl("button", {
+						cls: "friend-tracker-sort-button",
+					});
 
-				// Add sort indicator span
-				const indicator = button.createEl("span", {
-					cls: "sort-indicator",
-					text:
-						this.currentSort.column === key
-							? this.currentSort.direction === "asc"
-								? "↑"
-								: "↓"
-							: "",
-				});
+					// Add text span
+					button.createEl("span", { text: label });
 
-				button.addEventListener("click", () => {
-					this.handleSort(key);
-				});
+					// Add sort indicator span
+					button.createEl("span", {
+						cls: "sort-indicator",
+						text:
+							this.currentSort.column === key
+								? this.currentSort.direction === "asc"
+									? "↑"
+									: "↓"
+								: "",
+					});
+
+					button.addEventListener("click", () => {
+						this.handleSort(key);
+					});
+				} else {
+					th.setText(label);
+				}
 			});
 
 			// Create table rows
@@ -271,10 +285,28 @@ class FriendTrackerView extends ItemView {
 				});
 				row.createEl("td", { text: contact.relationship || "N/A" });
 
+				// Add actions cell with both edit and delete buttons
+				const actionsCell = row.createEl("td", {
+					cls: "friend-tracker-actions",
+				});
+
+				// Add delete button
+				const deleteButton = actionsCell.createEl("button", {
+					cls: "friend-tracker-delete-button",
+					attr: { "aria-label": "Remove contact" },
+				});
+				setIcon(deleteButton, "trash");
+
+				// Add click handlers
 				row.addEventListener("click", (e) => {
 					if (!(e.target as HTMLElement).closest("button")) {
 						this.openContact(contact.file);
 					}
+				});
+
+				deleteButton.addEventListener("click", (e) => {
+					e.stopPropagation();
+					this.openDeleteModal(contact.file);
 				});
 			});
 		} finally {
@@ -466,8 +498,6 @@ class FriendTrackerView extends ItemView {
 			"email:",
 			"phone:",
 			"address:",
-			"lastContacted:",
-			"contactFrequency:", // e.g., "weekly", "monthly", "quarterly"
 			"---",
 			"",
 			`# ${name}`,
@@ -493,6 +523,19 @@ class FriendTrackerView extends ItemView {
 		} catch (error) {
 			new Notice(`Error creating contact: ${error}`);
 		}
+	}
+
+	private async openDeleteModal(file: TFile) {
+		const modal = new DeleteContactModal(this.app, file, async () => {
+			try {
+				await this.app.vault.trash(file, true);
+				new Notice(`Deleted contact: ${file.basename}`);
+				this.refresh();
+			} catch (error) {
+				new Notice(`Error deleting contact: ${error}`);
+			}
+		});
+		modal.open();
 	}
 }
 
@@ -533,6 +576,50 @@ class AddContactModal extends Modal {
 		form.createEl("button", {
 			text: "Add Contact",
 			attr: { type: "submit" },
+		});
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
+	}
+}
+
+class DeleteContactModal extends Modal {
+	constructor(
+		app: App,
+		private contact: TFile,
+		private onConfirm: () => void
+	) {
+		super(app);
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.empty();
+
+		contentEl.createEl("h2", { text: "Delete Contact" });
+		contentEl.createEl("p", {
+			text: `Are you sure you want to delete ${this.contact.basename}?`,
+		});
+
+		const buttonContainer = contentEl.createEl("div", {
+			cls: "friend-tracker-delete-modal-buttons",
+		});
+
+		const cancelButton = buttonContainer.createEl("button", {
+			text: "Cancel",
+			cls: "friend-tracker-button-secondary",
+		});
+		cancelButton.addEventListener("click", () => this.close());
+
+		const deleteButton = buttonContainer.createEl("button", {
+			text: "Delete",
+			cls: "friend-tracker-button-danger",
+		});
+		deleteButton.addEventListener("click", async () => {
+			await this.onConfirm();
+			this.close();
 		});
 	}
 
