@@ -627,7 +627,7 @@ class AddContactModal extends Modal {
 			cls: "friend-tracker-modal-buttons",
 		});
 		const submitButton = buttonContainer.createEl("button", {
-			text: "Add Contact",
+			text: "Create Contact",
 			attr: { type: "submit" },
 			cls: "friend-tracker-modal-submit",
 		});
