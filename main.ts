@@ -11,9 +11,9 @@ import {
 	parseYaml,
 	Modal,
 	setIcon,
+	EventRef,
 } from "obsidian";
 import { addIcon } from "obsidian";
-import { pencil, trash2 } from "lucide";
 
 const VIEW_TYPE_FRIEND_TRACKER = "friend-tracker-view";
 const VIEW_TYPE_CONTACT_PAGE = "contact-page-view";
@@ -35,7 +35,7 @@ interface Contact {
 }
 
 interface SortConfig {
-	column: keyof Omit<Contact, "file">;
+	column: keyof Omit<ContactWithCountdown, "file">;
 	direction: "asc" | "desc";
 }
 
@@ -90,13 +90,9 @@ export default class FriendTracker extends Plugin {
 	}
 
 	async activateView() {
-		const leaves = this.app.workspace.getLeavesOfType(
-			VIEW_TYPE_FRIEND_TRACKER
-		);
-		if (leaves.length) {
-			this.app.workspace.revealLeaf(leaves[0]);
-		} else {
-			await this.app.workspace.getRightLeaf(false).setViewState({
+		const leaf = this.app.workspace.getRightLeaf(false);
+		if (leaf) {
+			await leaf.setViewState({
 				type: VIEW_TYPE_FRIEND_TRACKER,
 				active: true,
 			});
@@ -331,7 +327,7 @@ class FriendTrackerView extends ItemView {
 		}
 	}
 
-	private handleSort(column: keyof Omit<Contact, "file">) {
+	private handleSort(column: keyof Omit<ContactWithCountdown, "file">) {
 		if (this.currentSort.column === column) {
 			// Toggle direction if clicking the same column
 			this.currentSort.direction =
@@ -346,7 +342,10 @@ class FriendTrackerView extends ItemView {
 		this.refresh();
 	}
 
-	private sortContacts(contacts: Contact[], sort: SortConfig): Contact[] {
+	private sortContacts(
+		contacts: ContactWithCountdown[],
+		sort: SortConfig
+	): ContactWithCountdown[] {
 		return [...contacts].sort((a, b) => {
 			let valueA = a[sort.column];
 			let valueB = b[sort.column];
@@ -778,14 +777,11 @@ class ContactPageView extends ItemView {
 
 		// Handle name changes
 		nameInput.addEventListener("change", async () => {
-			if (!this.file) return;
-
+			if (!this.file?.parent) return;
 			const newName = nameInput.value.trim();
 			if (newName) {
 				this.contactData.name = newName;
-				await this.saveContactData();
 
-				// Update the file name to match the contact name
 				const newPath = `${this.file.parent.path}/${newName}.md`;
 				try {
 					await this.app.fileManager.renameFile(this.file, newPath);
@@ -793,9 +789,6 @@ class ContactPageView extends ItemView {
 				} catch (error) {
 					new Notice(`Error updating file name: ${error}`);
 				}
-			} else {
-				// Reset to previous name if empty
-				nameInput.value = this.contactData.name;
 			}
 		});
 
@@ -943,7 +936,7 @@ class ContactPageView extends ItemView {
 						cls: "contact-interaction-edit",
 						attr: { "aria-label": "Edit interaction" },
 					});
-					setIcon(editBtn, "edit");
+					setIcon(editBtn, "pencil");
 
 					// Delete button
 					const deleteBtn = actions.createEl("button", {
