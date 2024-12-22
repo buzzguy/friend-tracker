@@ -1,89 +1,98 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import {
+	App,
+	Plugin,
+	PluginSettingTab,
+	Setting,
+	Notice,
+	TFile,
+	TFolder,
+	ItemView,
+	WorkspaceLeaf,
+	parseYaml,
+	Modal,
+} from "obsidian";
 
-// Remember to rename these classes and interfaces!
+const VIEW_TYPE_FRIEND_TRACKER = "friend-tracker-view";
 
-interface MyPluginSettings {
-	mySetting: string;
+interface FriendTrackerSettings {
+	defaultFolder: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+const DEFAULT_SETTINGS: FriendTrackerSettings = {
+	defaultFolder: "FriendTracker",
+};
+
+interface Contact {
+	name: string;
+	birthday: string;
+	relationship: string;
+	age: number | null;
+	file: TFile;
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+interface SortConfig {
+	column: keyof Omit<Contact, "file">;
+	direction: "asc" | "desc";
+}
+
+interface ContactWithCountdown extends Contact {
+	formattedBirthday: string;
+	daysUntilBirthday: number | null;
+}
+
+export default class FriendTracker extends Plugin {
+	settings: FriendTrackerSettings;
 
 	async onload() {
 		await this.loadSettings();
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
+		// Register the custom view
+		this.registerView(
+			VIEW_TYPE_FRIEND_TRACKER,
+			(leaf) => new FriendTrackerView(leaf, this)
+		);
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
-
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-			}
+		// Add ribbon icon to open the Friend Tracker view
+		this.addRibbonIcon("user", "Open Friend Tracker", () => {
+			this.activateView();
 		});
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		// Add settings tab
+		this.addSettingTab(new FriendTrackerSettingTab(this.app, this));
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+		// Ensure the folder exists
+		await this.ensureFolderExists();
 	}
 
-	onunload() {
+	async ensureFolderExists() {
+		const folder = this.settings.defaultFolder;
+		const vault = this.app.vault;
 
+		if (!vault.getAbstractFileByPath(folder)) {
+			await vault.createFolder(folder);
+		}
+	}
+
+	async activateView() {
+		const leaves = this.app.workspace.getLeavesOfType(
+			VIEW_TYPE_FRIEND_TRACKER
+		);
+		if (leaves.length) {
+			this.app.workspace.revealLeaf(leaves[0]);
+		} else {
+			await this.app.workspace.getRightLeaf(false).setViewState({
+				type: VIEW_TYPE_FRIEND_TRACKER,
+				active: true,
+			});
+		}
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData()
+		);
 	}
 
 	async saveSettings() {
@@ -91,44 +100,444 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
+class FriendTrackerSettingTab extends PluginSettingTab {
+	plugin: FriendTracker;
 
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
-}
-
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
-
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: FriendTracker) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
 	display(): void {
-		const {containerEl} = this;
-
+		const { containerEl } = this;
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
+			.setName("Default Folder")
+			.setDesc("Folder to store contact files")
+			.addText((text) =>
+				text
+					.setPlaceholder("Enter folder name")
+					.setValue(this.plugin.settings.defaultFolder)
+					.onChange(async (value) => {
+						this.plugin.settings.defaultFolder = value.trim();
+						await this.plugin.saveSettings();
+					})
+			);
+	}
+}
+
+class FriendTrackerView extends ItemView {
+	plugin: FriendTracker;
+	private fileChangeHandler: EventRef | null = null;
+	private currentSort: SortConfig = {
+		column: "age",
+		direction: "asc",
+	};
+	private isRefreshing = false;
+
+	constructor(leaf: WorkspaceLeaf, plugin: FriendTracker) {
+		super(leaf);
+		this.plugin = plugin;
+	}
+
+	getViewType() {
+		return VIEW_TYPE_FRIEND_TRACKER;
+	}
+
+	getDisplayText() {
+		return "Friend Tracker";
+	}
+
+	getIcon() {
+		return "user"; // Use Obsidian's "user" icon
+	}
+
+	async onOpen() {
+		// Clear any existing handlers first
+		if (this.fileChangeHandler) {
+			this.app.vault.offref(this.fileChangeHandler);
+			this.fileChangeHandler = null;
+		}
+
+		// Register new file change handler
+		this.fileChangeHandler = this.app.vault.on("modify", (file) => {
+			if (file instanceof TFile && this.isContactFile(file)) {
+				// Debounce the refresh call
+				setTimeout(() => this.refresh(), 100);
+			}
+		});
+
+		// Initial refresh
+		await this.refresh();
+	}
+
+	private isContactFile(file: TFile): boolean {
+		const contactFolder = this.plugin.settings.defaultFolder;
+		return file.path.startsWith(contactFolder + "/");
+	}
+
+	async refresh() {
+		if (this.isRefreshing) return;
+		this.isRefreshing = true;
+
+		try {
+			const container = this.containerEl.children[1];
+			container.empty();
+
+			// Create header and add contact button container
+			const headerContainer = container.createEl("div", {
+				cls: "friend-tracker-header",
+			});
+			headerContainer.createEl("h2", { text: "Friend Tracker" });
+
+			const addButton = headerContainer.createEl("button", {
+				text: "Add Contact",
+				cls: "friend-tracker-add-button",
+			});
+			addButton.addEventListener("click", () =>
+				this.openAddContactModal()
+			);
+
+			// Fetch and sort contacts
+			let contacts = await this.getContacts();
+			contacts = this.sortContacts(contacts, this.currentSort);
+
+			if (contacts.length === 0) {
+				const emptyState = container.createEl("div", {
+					cls: "friend-tracker-empty-state",
+				});
+				emptyState.createEl("p", {
+					text: "No contacts found. Get started by creating your first contact!",
+				});
+				return;
+			}
+
+			// Create table for contacts
+			const table = container.createEl("table");
+			table.style.width = "100%";
+
+			// Create header row with sort buttons
+			const headerRow = table.createEl("tr");
+			const columns: Array<{
+				key: keyof Omit<ContactWithCountdown, "file">;
+				label: string;
+			}> = [
+				{ key: "name", label: "Name" },
+				{ key: "age", label: "Age" },
+				{ key: "formattedBirthday", label: "Birthday" },
+				{ key: "daysUntilBirthday", label: "Days Until Birthday" },
+				{ key: "relationship", label: "Relationship" },
+			];
+
+			columns.forEach(({ key, label }) => {
+				const th = headerRow.createEl("th");
+				const button = th.createEl("button", {
+					cls: "friend-tracker-sort-button",
+				});
+
+				// Add text span
+				button.createEl("span", { text: label });
+
+				// Add sort indicator span
+				const indicator = button.createEl("span", {
+					cls: "sort-indicator",
+					text:
+						this.currentSort.column === key
+							? this.currentSort.direction === "asc"
+								? "↑"
+								: "↓"
+							: "",
+				});
+
+				button.addEventListener("click", () => {
+					this.handleSort(key);
+				});
+			});
+
+			// Create table rows
+			contacts.forEach((contact) => {
+				const row = table.createEl("tr");
+				row.createEl("td", { text: contact.name });
+				row.createEl("td", { text: contact.age?.toString() || "N/A" });
+				row.createEl("td", {
+					text: contact.formattedBirthday || "N/A",
+				});
+				row.createEl("td", {
+					text:
+						contact.daysUntilBirthday !== null
+							? `${contact.daysUntilBirthday} days`
+							: "N/A",
+				});
+				row.createEl("td", { text: contact.relationship || "N/A" });
+
+				row.addEventListener("click", (e) => {
+					if (!(e.target as HTMLElement).closest("button")) {
+						this.openContact(contact.file);
+					}
+				});
+			});
+		} finally {
+			this.isRefreshing = false;
+		}
+	}
+
+	private handleSort(column: keyof Omit<Contact, "file">) {
+		if (this.currentSort.column === column) {
+			// Toggle direction if clicking the same column
+			this.currentSort.direction =
+				this.currentSort.direction === "asc" ? "desc" : "asc";
+		} else {
+			// New column, default to ascending
+			this.currentSort = {
+				column,
+				direction: "asc",
+			};
+		}
+		this.refresh();
+	}
+
+	private sortContacts(contacts: Contact[], sort: SortConfig): Contact[] {
+		return [...contacts].sort((a, b) => {
+			let valueA = a[sort.column];
+			let valueB = b[sort.column];
+
+			// Handle null/undefined values
+			if (valueA == null) valueA = "";
+			if (valueB == null) valueB = "";
+
+			// Convert to strings for comparison
+			const strA = valueA.toString().toLowerCase();
+			const strB = valueB.toString().toLowerCase();
+
+			const comparison = strA.localeCompare(strB);
+			return sort.direction === "asc" ? comparison : -comparison;
+		});
+	}
+
+	async getContacts(): Promise<ContactWithCountdown[]> {
+		const folder = this.plugin.settings.defaultFolder;
+		const vault = this.app.vault;
+		const folderPath = vault.getAbstractFileByPath(folder);
+
+		if (!folderPath || !(folderPath instanceof TFolder)) {
+			new Notice("Friend Tracker folder not found.");
+			return [];
+		}
+
+		const files = folderPath.children.filter(
+			(file) => file instanceof TFile
+		);
+		const contacts: ContactWithCountdown[] = [];
+
+		for (const file of files) {
+			if (!(file instanceof TFile)) continue;
+
+			const content = await vault.read(file);
+			const metadata = this.parseYaml(content);
+
+			if (metadata) {
+				const age = this.calculateAge(metadata.birthday);
+				const formattedBirthday = this.formatBirthday(
+					metadata.birthday
+				);
+				const daysUntilBirthday = this.calculateDaysUntilBirthday(
+					metadata.birthday
+				);
+
+				contacts.push({
+					name: metadata.name || "Unknown",
+					birthday: metadata.birthday || "",
+					formattedBirthday,
+					relationship: metadata.relationship || "",
+					age,
+					daysUntilBirthday,
+					file,
+				});
+			}
+		}
+
+		return contacts;
+	}
+
+	private calculateAge(birthday: string): number | null {
+		if (!birthday) return null;
+
+		const birthDate = new Date(birthday);
+		if (isNaN(birthDate.getTime())) return null;
+
+		const today = new Date();
+		let age = today.getFullYear() - birthDate.getFullYear();
+		const monthDiff = today.getMonth() - birthDate.getMonth();
+
+		if (
+			monthDiff < 0 ||
+			(monthDiff === 0 && today.getDate() < birthDate.getDate())
+		) {
+			age--;
+		}
+
+		return age;
+	}
+
+	private formatBirthday(dateStr: string): string {
+		if (!dateStr) return "";
+		const date = new Date(dateStr);
+		if (isNaN(date.getTime())) return dateStr;
+
+		return date.toLocaleDateString("en-US", {
+			month: "long",
+			day: "numeric",
+		});
+	}
+
+	private calculateDaysUntilBirthday(birthday: string): number | null {
+		if (!birthday) return null;
+
+		const today = new Date();
+		const birthDate = new Date(birthday);
+		if (isNaN(birthDate.getTime())) return null;
+
+		// Create this year's birthday
+		const thisYearBirthday = new Date(
+			today.getFullYear(),
+			birthDate.getMonth(),
+			birthDate.getDate()
+		);
+
+		// If this year's birthday has passed, use next year's birthday
+		if (thisYearBirthday < today) {
+			thisYearBirthday.setFullYear(today.getFullYear() + 1);
+		}
+
+		// Calculate days difference
+		const diffTime = thisYearBirthday.getTime() - today.getTime();
+		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+		return diffDays;
+	}
+
+	parseYaml(content: string): Record<string, any> | null {
+		const match = content.match(/^---\n([\s\S]+?)\n---/);
+		return match ? parseYaml(match[1]) : null;
+	}
+
+	async openContact(file: TFile) {
+		const leaf = this.app.workspace.getLeaf();
+		await leaf.openFile(file);
+	}
+
+	async onClose() {
+		if (this.fileChangeHandler) {
+			this.app.vault.offref(this.fileChangeHandler);
+			this.fileChangeHandler = null;
+		}
+		this.isRefreshing = false;
+	}
+
+	async openAddContactModal() {
+		const modal = new AddContactModal(
+			this.app,
+			this.plugin,
+			async (name) => {
+				try {
+					await this.createNewContact(name);
+					modal.close();
+					// Wait a brief moment before refreshing to ensure file system events are settled
+					setTimeout(() => this.refresh(), 100);
+				} catch (error) {
+					new Notice(`Error creating contact: ${error}`);
+				}
+			}
+		);
+		modal.open();
+	}
+
+	async createNewContact(name: string) {
+		const folder = this.plugin.settings.defaultFolder;
+		const fileName = `${name}.md`;
+		const filePath = `${folder}/${fileName}`;
+
+		const content = [
+			"---",
+			`name: ${name}`,
+			"birthday:", // YYYY-MM-DD format
+			"relationship:",
+			"email:",
+			"phone:",
+			"address:",
+			"lastContacted:",
+			"contactFrequency:", // e.g., "weekly", "monthly", "quarterly"
+			"---",
+			"",
+			`# ${name}`,
+			"",
+			"## Family",
+			"- Spouse: [[]]",
+			"- Children: ",
+			"  - [[]]",
+			"",
+			"## Recent Interactions",
+			"_Add recent interactions here_",
+			"",
+			"## Important Information",
+			"_Add important information here_",
+			"",
+			"## Notes",
+			"_Add general notes here_",
+		].join("\n");
+
+		try {
+			await this.app.vault.create(filePath, content);
+			new Notice(`Created contact: ${name}`);
+		} catch (error) {
+			new Notice(`Error creating contact: ${error}`);
+		}
+	}
+}
+
+class AddContactModal extends Modal {
+	plugin: FriendTracker;
+	onSubmit: (name: string) => void;
+
+	constructor(
+		app: App,
+		plugin: FriendTracker,
+		onSubmit: (name: string) => void
+	) {
+		super(app);
+		this.plugin = plugin;
+		this.onSubmit = onSubmit;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.empty();
+		contentEl.createEl("h2", { text: "Add New Contact" });
+
+		const form = contentEl.createEl("form");
+		form.addEventListener("submit", async (e) => {
+			e.preventDefault();
+			const nameInput = form.querySelector("input");
+			if (nameInput?.value) {
+				await this.onSubmit(nameInput.value);
+				// Don't close here, let the caller handle it
+			}
+		});
+
+		const nameInput = form.createEl("input", {
+			attr: { type: "text", placeholder: "Contact name" },
+		});
+		nameInput.focus();
+
+		form.createEl("button", {
+			text: "Add Contact",
+			attr: { type: "submit" },
+		});
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
 	}
 }

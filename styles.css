@@ -6,3 +6,99 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.friend-tracker-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.friend-tracker-add-button {
+	padding: 5px 10px;
+	cursor: pointer;
+}
+
+.friend-tracker-empty-state {
+	text-align: center;
+	padding: 40px 20px;
+	color: var(--text-muted);
+}
+
+.friend-tracker-view table {
+	border-collapse: collapse;
+	width: 100%;
+	margin: 0;
+}
+
+.friend-tracker-view tr {
+	cursor: pointer;
+}
+
+.friend-tracker-view tr:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.friend-tracker-view th {
+	padding: 0;
+	font-weight: var(--font-medium);
+	border-bottom: 2px solid var(--background-modifier-border);
+}
+
+.friend-tracker-view td {
+	padding: 8px 4px;
+}
+
+.friend-tracker-sort-button {
+	background: none;
+	border: none;
+	margin: 0;
+	padding: 8px 4px;
+	cursor: pointer;
+	width: 100%;
+	text-align: left;
+	color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	box-shadow: none !important;
+	border-radius: 0;
+	-webkit-appearance: none;
+	font-weight: inherit;
+}
+
+.friend-tracker-sort-button:hover {
+	color: var(--text-normal);
+	background: none !important;
+	box-shadow: none !important;
+}
+
+.friend-tracker-sort-button:active,
+.friend-tracker-sort-button:focus {
+	box-shadow: none !important;
+	background: none !important;
+	outline: none !important;
+}
+
+.friend-tracker-sort-button .sort-indicator {
+	font-size: 0.8em;
+	opacity: 0.5;
+	margin-left: 4px;
+}
+
+.friend-tracker-sort-button:hover .sort-indicator {
+	opacity: 0.8;
+}
+
+.friend-tracker-sort-button:active {
+	box-shadow: none;
+	background: none;
+}
+
+.friend-tracker-sort-button:focus {
+	box-shadow: none;
+}
+
+.friend-tracker-sort-button:focus-visible {
+	outline: none;
+}
