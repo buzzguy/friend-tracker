@@ -13,7 +13,6 @@ import {
 	setIcon,
 	EventRef,
 } from "obsidian";
-import { addIcon } from "obsidian";
 
 const VIEW_TYPE_FRIEND_TRACKER = "friend-tracker-view";
 const VIEW_TYPE_CONTACT_PAGE = "contact-page-view";
@@ -1002,7 +1001,7 @@ class ContactPageView extends ItemView {
 			// Format phone number as user types
 			input.addEventListener("input", (e) => {
 				const target = e.target as HTMLInputElement;
-				let value = target.value.replace(/\D/g, ""); // Remove non-digits
+				const value = target.value.replace(/\D/g, ""); // Remove non-digits
 				if (value.length > 0) {
 					if (value.length <= 3) {
 						target.value = value;
