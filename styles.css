@@ -213,3 +213,23 @@ If your plugin does not need CSS, delete this file.
 .contact-field-input[type="date"]:hover::-webkit-calendar-picker-indicator {
 	opacity: 1;
 }
+
+.contact-add-field-button {
+	margin-top: 16px;
+	padding: 8px 16px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	opacity: 0.8;
+}
+
+.contact-add-field-button:hover {
+	opacity: 1;
+}
+
+.contact-add-field-submit {
+	margin-top: 16px;
+	width: 100%;
+}

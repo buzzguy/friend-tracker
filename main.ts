@@ -462,26 +462,21 @@ class FriendTrackerView extends ItemView {
 	}
 
 	async openContact(file: TFile) {
-		// Try to find an existing leaf with this contact
-		const leaves = this.app.workspace.getLeavesOfType(
-			VIEW_TYPE_CONTACT_PAGE
-		);
-		const existingLeaf = leaves.find(
-			(leaf) =>
-				(leaf.view as ContactPageView).getState().filePath === file.path
-		);
+		// Try to get an existing leaf in the center
+		let leaf = this.app.workspace.getMostRecentLeaf();
 
-		if (existingLeaf) {
-			this.app.workspace.revealLeaf(existingLeaf);
-			return;
+		// If no leaf exists or it's not in the center, create a new one
+		if (!leaf || leaf.getViewState().type === VIEW_TYPE_FRIEND_TRACKER) {
+			leaf = this.app.workspace.getLeaf("tab");
 		}
 
-		// Open in new leaf
-		const leaf = this.app.workspace.getLeaf("tab");
-		await leaf.setViewState({
-			type: VIEW_TYPE_CONTACT_PAGE,
-			state: { filePath: file.path },
-		});
+		if (leaf) {
+			await leaf.setViewState({
+				type: VIEW_TYPE_CONTACT_PAGE,
+				state: { filePath: file.path },
+			});
+			this.app.workspace.revealLeaf(leaf);
+		}
 	}
 
 	async onClose() {
@@ -519,27 +514,11 @@ class FriendTrackerView extends ItemView {
 			"---",
 			`name: ${name}`,
 			"birthday:", // YYYY-MM-DD format
-			"relationship:",
 			"email:",
 			"phone:",
 			"address:",
+			"relationship:",
 			"---",
-			"",
-			`# ${name}`,
-			"",
-			"## Family",
-			"- Spouse: [[]]",
-			"- Children: ",
-			"  - [[]]",
-			"",
-			"## Recent Interactions",
-			"_Add recent interactions here_",
-			"",
-			"## Important Information",
-			"_Add important information here_",
-			"",
-			"## Notes",
-			"_Add general notes here_",
 		].join("\n");
 
 		try {
@@ -725,11 +704,38 @@ class ContactPageView extends ItemView {
 		const basicInfo = infoSection.createEl("div", {
 			cls: "contact-basic-info",
 		});
-		this.createInfoField(basicInfo, "Birthday", this.contactData.birthday);
-		this.createInfoField(basicInfo, "Email", this.contactData.email);
-		this.createInfoField(basicInfo, "Phone", this.contactData.phone);
 
-		// Interactions
+		// Standard fields first
+		const standardFields = ["Birthday", "Email", "Phone", "Address"];
+		standardFields.forEach((field) => {
+			this.createInfoField(
+				basicInfo,
+				field,
+				this.contactData[field.toLowerCase()]
+			);
+		});
+
+		// Then any custom fields (excluding internal fields)
+		const excludedFields = [
+			"name",
+			...standardFields.map((f) => f.toLowerCase()),
+		];
+		Object.entries(this.contactData)
+			.filter(([key]) => !excludedFields.includes(key))
+			.forEach(([key, value]) => {
+				this.createInfoField(basicInfo, key, value as string);
+			});
+
+		// Add custom field button at the bottom
+		const addFieldButton = basicInfo.createEl("button", {
+			text: "Add Custom Field",
+			cls: "contact-add-field-button",
+		});
+		addFieldButton.addEventListener("click", () => {
+			this.openAddFieldModal();
+		});
+
+		// Interactions section
 		const interactions = container.createEl("div", {
 			cls: "contact-interactions",
 		});
@@ -753,28 +759,60 @@ class ContactPageView extends ItemView {
 			const input = field.createEl("input", {
 				cls: "contact-field-input",
 				attr: {
-					type: "date", // Use HTML5 date input
+					type: "date",
 					value: value || "",
 					placeholder: "YYYY-MM-DD",
 				},
 			});
 
-			// Handle input changes for birthday
 			input.addEventListener("change", async () => {
 				if (!this.file) return;
-
-				// Format the date to YYYY-MM-DD
 				const date = input.valueAsDate;
 				const formattedDate = date
 					? date.toISOString().split("T")[0]
 					: input.value;
-
-				// Update the contact data
 				this.contactData[label.toLowerCase()] = formattedDate;
 				await this.saveContactData();
 			});
-		} else {
-			// Regular text input for other fields
+		}
+		// Special handling for phone field
+		else if (label === "Phone") {
+			const input = field.createEl("input", {
+				cls: "contact-field-input",
+				attr: {
+					type: "tel",
+					value: value || "",
+					placeholder: "000-000-0000",
+					pattern: "[0-9]{3}-[0-9]{3}-[0-9]{4}",
+				},
+			});
+
+			// Format phone number as user types
+			input.addEventListener("input", (e) => {
+				const target = e.target as HTMLInputElement;
+				let value = target.value.replace(/\D/g, ""); // Remove non-digits
+				if (value.length > 0) {
+					if (value.length <= 3) {
+						target.value = value;
+					} else if (value.length <= 6) {
+						target.value = `${value.slice(0, 3)}-${value.slice(3)}`;
+					} else {
+						target.value = `${value.slice(0, 3)}-${value.slice(
+							3,
+							6
+						)}-${value.slice(6, 10)}`;
+					}
+				}
+			});
+
+			input.addEventListener("change", async () => {
+				if (!this.file) return;
+				this.contactData[label.toLowerCase()] = input.value;
+				await this.saveContactData();
+			});
+		}
+		// Regular text input for other fields
+		else {
 			const input = field.createEl("input", {
 				cls: "contact-field-input",
 				attr: {
@@ -784,7 +822,6 @@ class ContactPageView extends ItemView {
 				},
 			});
 
-			// Handle input changes for other fields
 			input.addEventListener("change", async () => {
 				if (!this.file) return;
 				this.contactData[label.toLowerCase()] = input.value;
@@ -816,5 +853,65 @@ class ContactPageView extends ItemView {
 			await this.app.vault.modify(this.file, newContent);
 			new Notice(`Updated contact`);
 		}
+	}
+
+	private async openAddFieldModal() {
+		const modal = new AddFieldModal(this.app, async (fieldName) => {
+			if (!this.contactData[fieldName]) {
+				this.contactData[fieldName] = "";
+				await this.saveContactData();
+				this.render();
+			} else {
+				new Notice("Field already exists!");
+			}
+		});
+		modal.open();
+	}
+}
+
+// Add this new modal class
+class AddFieldModal extends Modal {
+	private onSubmit: (fieldName: string) => void;
+
+	constructor(app: App, onSubmit: (fieldName: string) => void) {
+		super(app);
+		this.onSubmit = onSubmit;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.empty();
+		contentEl.createEl("h2", { text: "Add Custom Field" });
+
+		const form = contentEl.createEl("form");
+		form.addEventListener("submit", (e) => {
+			e.preventDefault();
+			const input = form.querySelector("input");
+			if (input?.value) {
+				this.onSubmit(input.value.toLowerCase());
+				this.close();
+			}
+		});
+
+		const input = form.createEl("input", {
+			attr: {
+				type: "text",
+				placeholder: "Field name",
+				pattern: "[a-zA-Z][a-zA-Z0-9]*",
+			},
+			cls: "contact-field-input",
+		});
+		input.focus();
+
+		form.createEl("button", {
+			text: "Add Field",
+			attr: { type: "submit" },
+			cls: "contact-add-field-submit",
+		});
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
 	}
 }
