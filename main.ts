@@ -63,17 +63,13 @@ export default class FriendTracker extends Plugin {
 
 	private async initialize() {
 		try {
-			console.log("Friend Tracker: Starting load");
-
 			await this.ensureFolderExists();
-			console.log("Friend Tracker: Folder checked");
 
 			// Register views
-			this.registerView(VIEW_TYPE_FRIEND_TRACKER, (leaf) => {
-				console.log("Friend Tracker: Creating view");
-				return new FriendTrackerView(leaf, this);
-			});
-			console.log("Friend Tracker: View registered");
+			this.registerView(
+				VIEW_TYPE_FRIEND_TRACKER,
+				(leaf) => new FriendTrackerView(leaf, this)
+			);
 
 			this.registerView(
 				VIEW_TYPE_CONTACT_PAGE,
