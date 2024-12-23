@@ -226,7 +226,6 @@ class FriendTrackerView extends ItemView {
 
 			// Create table for contacts
 			const table = container.createEl("table");
-			table.style.width = "100%";
 
 			// Create header row with sort buttons
 			const headerRow = table.createEl("tr");
@@ -620,11 +619,25 @@ class AddContactModal extends Modal {
 			cls: "friend-tracker-modal-input",
 		});
 
+		// Relationship field (optional)
+		const relationshipField = form.createDiv({
+			cls: "friend-tracker-modal-field",
+		});
+		relationshipField.createEl("label", { text: "Relationship" });
+		const relationshipInput = relationshipField.createEl("input", {
+			attr: {
+				type: "text",
+				name: "relationship",
+				placeholder: "Friend, Family, Colleague, etc.",
+			},
+			cls: "friend-tracker-modal-input",
+		});
+
 		// Submit button
 		const buttonContainer = form.createDiv({
 			cls: "friend-tracker-modal-buttons",
 		});
-		const submitButton = buttonContainer.createEl("button", {
+		form.createEl("button", {
 			text: "Create Contact",
 			attr: { type: "submit" },
 			cls: "friend-tracker-modal-submit",
@@ -639,6 +652,8 @@ class AddContactModal extends Modal {
 			if (birthdayInput.value) contactData.birthday = birthdayInput.value;
 			if (emailInput.value) contactData.email = emailInput.value;
 			if (phoneInput.value) contactData.phone = phoneInput.value;
+			if (relationshipInput.value)
+				contactData.relationship = relationshipInput.value;
 
 			if (contactData.name) {
 				this.onSubmit(contactData);
@@ -801,7 +816,13 @@ class ContactPageView extends ItemView {
 		});
 
 		// Standard fields first
-		const standardFields = ["Birthday", "Email", "Phone", "Address"];
+		const standardFields = [
+			"Birthday",
+			"Email",
+			"Phone",
+			"Address",
+			"Relationship",
+		];
 		standardFields.forEach((field) => {
 			this.createInfoField(
 				basicInfo,
@@ -852,9 +873,13 @@ class ContactPageView extends ItemView {
 
 		// Auto-resize textarea as content changes
 		notesInput.addEventListener("input", () => {
-			notesInput.style.height = "auto";
-			notesInput.style.height = notesInput.scrollHeight + "px";
+			this.adjustTextareaHeight(notesInput);
 		});
+
+		// Add initial height adjustment
+		setTimeout(() => {
+			this.adjustTextareaHeight(notesInput);
+		}, 0);
 
 		// Save notes when changed
 		notesInput.addEventListener("change", async () => {
@@ -862,12 +887,6 @@ class ContactPageView extends ItemView {
 			this.contactData.notes = notesInput.value;
 			await this.saveContactData();
 		});
-
-		// Trigger initial height adjustment
-		setTimeout(() => {
-			notesInput.style.height = "auto";
-			notesInput.style.height = notesInput.scrollHeight + "px";
-		}, 0);
 
 		// Interactions section
 		const interactions = container.createEl("div", {
@@ -914,13 +933,13 @@ class ContactPageView extends ItemView {
 					});
 
 					// Date
-					const dateEl = interactionEl.createEl("div", {
+					interactionEl.createEl("div", {
 						cls: "contact-interaction-date",
 						text: formattedDate,
 					});
 
 					// Text
-					const textEl = interactionEl.createEl("div", {
+					interactionEl.createEl("div", {
 						cls: "contact-interaction-text",
 						text: interaction.text,
 					});
@@ -1138,6 +1157,13 @@ class ContactPageView extends ItemView {
 		await this.saveContactData();
 		this.render();
 	}
+
+	private adjustTextareaHeight(textarea: HTMLTextAreaElement) {
+		textarea.classList.add("adjusting");
+		textarea.style.height = "auto";
+		textarea.style.height = textarea.scrollHeight + "px";
+		textarea.classList.remove("adjusting");
+	}
 }
 
 // Add this new modal class
@@ -1213,29 +1239,18 @@ class InteractionModal extends Modal {
 		const form = contentEl.createEl("form");
 		form.addEventListener("submit", (e) => {
 			e.preventDefault();
-			const dateInput = form.querySelector(
-				"[type=date]"
-			) as HTMLInputElement;
 			const textInput = form.querySelector(
 				"textarea"
 			) as HTMLTextAreaElement;
 
-			if (dateInput?.value && textInput?.value) {
-				this.onSubmit(dateInput.value, textInput.value);
+			if (textInput?.value) {
+				this.onSubmit(
+					this.interaction?.date ||
+						new Date().toISOString().split("T")[0],
+					textInput.value
+				);
 				this.close();
 			}
-		});
-
-		// Date input
-		const dateInput = form.createEl("input", {
-			attr: {
-				type: "date",
-				value:
-					this.interaction?.date ||
-					new Date().toISOString().split("T")[0],
-				required: "true",
-			},
-			cls: "contact-interaction-date-input",
 		});
 
 		// Text input
