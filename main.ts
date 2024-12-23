@@ -1160,8 +1160,8 @@ class ContactPageView extends ItemView {
 
 	private adjustTextareaHeight(textarea: HTMLTextAreaElement) {
 		textarea.classList.add("adjusting");
-		textarea.style.height = "auto";
-		textarea.style.height = textarea.scrollHeight + "px";
+		const currentHeight = textarea.scrollHeight;
+		textarea.style.setProperty("--textarea-height", `${currentHeight}px`);
 		textarea.classList.remove("adjusting");
 	}
 }
@@ -1239,18 +1239,29 @@ class InteractionModal extends Modal {
 		const form = contentEl.createEl("form");
 		form.addEventListener("submit", (e) => {
 			e.preventDefault();
+			const dateInput = form.querySelector(
+				"[type=date]"
+			) as HTMLInputElement;
 			const textInput = form.querySelector(
 				"textarea"
 			) as HTMLTextAreaElement;
 
-			if (textInput?.value) {
-				this.onSubmit(
-					this.interaction?.date ||
-						new Date().toISOString().split("T")[0],
-					textInput.value
-				);
+			if (dateInput?.value && textInput?.value) {
+				this.onSubmit(dateInput.value, textInput.value);
 				this.close();
 			}
+		});
+
+		// Date input
+		form.createEl("input", {
+			attr: {
+				type: "date",
+				value:
+					this.interaction?.date ||
+					new Date().toISOString().split("T")[0],
+				required: "true",
+			},
+			cls: "contact-interaction-date-input",
 		});
 
 		// Text input
