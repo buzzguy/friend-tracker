@@ -55,28 +55,60 @@ export default class FriendTracker extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		// Register the custom view
-		this.registerView(
-			VIEW_TYPE_FRIEND_TRACKER,
-			(leaf) => new FriendTrackerView(leaf, this)
-		);
-
-		// Register the contact page view
-		this.registerView(
-			VIEW_TYPE_CONTACT_PAGE,
-			(leaf) => new ContactPageView(leaf, this)
-		);
-
-		// Add ribbon icon to open the Friend Tracker view
-		this.addRibbonIcon("user", "Open Friend Tracker", () => {
-			this.activateView();
+		// On mobile, we should wait for layout-ready
+		this.app.workspace.onLayoutReady(() => {
+			this.initialize();
 		});
+	}
 
-		// Add settings tab
-		this.addSettingTab(new FriendTrackerSettingTab(this.app, this));
+	private async initialize() {
+		try {
+			console.log("Friend Tracker: Starting load");
 
-		// Ensure the folder exists
-		await this.ensureFolderExists();
+			await this.ensureFolderExists();
+			console.log("Friend Tracker: Folder checked");
+
+			// Register views
+			this.registerView(VIEW_TYPE_FRIEND_TRACKER, (leaf) => {
+				console.log("Friend Tracker: Creating view");
+				return new FriendTrackerView(leaf, this);
+			});
+			console.log("Friend Tracker: View registered");
+
+			this.registerView(
+				VIEW_TYPE_CONTACT_PAGE,
+				(leaf) => new ContactPageView(leaf, this)
+			);
+
+			// Add ribbon icon
+			this.addRibbonIcon("user", "Open Friend Tracker", async () => {
+				const workspace = this.app.workspace;
+				const leaves = workspace.getLeavesOfType(
+					VIEW_TYPE_FRIEND_TRACKER
+				);
+
+				if (leaves.length > 0) {
+					workspace.revealLeaf(leaves[0]);
+				} else {
+					const leaf = workspace.getRightLeaf(false);
+					if (leaf) {
+						await leaf.setViewState({
+							type: VIEW_TYPE_FRIEND_TRACKER,
+							active: true,
+						});
+						workspace.revealLeaf(leaf);
+					} else {
+						new Notice("Could not create Friend Tracker view");
+					}
+				}
+			});
+
+			// Add settings tab
+			this.addSettingTab(new FriendTrackerSettingTab(this.app, this));
+		} catch (error) {
+			console.error("Friend Tracker failed to load:", error);
+			new Notice("Friend Tracker failed to load: " + error.message);
+		}
 	}
 
 	async ensureFolderExists() {
@@ -85,16 +117,6 @@ export default class FriendTracker extends Plugin {
 
 		if (!vault.getAbstractFileByPath(folder)) {
 			await vault.createFolder(folder);
-		}
-	}
-
-	async activateView() {
-		const leaf = this.app.workspace.getRightLeaf(false);
-		if (leaf) {
-			await leaf.setViewState({
-				type: VIEW_TYPE_FRIEND_TRACKER,
-				active: true,
-			});
 		}
 	}
 
@@ -152,11 +174,11 @@ class FriendTrackerView extends ItemView {
 		this.plugin = plugin;
 	}
 
-	getViewType() {
+	getViewType(): string {
 		return VIEW_TYPE_FRIEND_TRACKER;
 	}
 
-	getDisplayText() {
+	getDisplayText(): string {
 		return "Friend Tracker";
 	}
 
@@ -1159,10 +1181,10 @@ class ContactPageView extends ItemView {
 	}
 
 	private adjustTextareaHeight(textarea: HTMLTextAreaElement) {
-		textarea.classList.add("adjusting");
-		const currentHeight = textarea.scrollHeight;
-		textarea.style.setProperty("--textarea-height", `${currentHeight}px`);
-		textarea.classList.remove("adjusting");
+		// Reset height temporarily to get the correct scrollHeight
+		textarea.style.height = "0";
+		// Set the height to scrollHeight + border width
+		textarea.style.height = textarea.scrollHeight + "px";
 	}
 }
 
