@@ -446,7 +446,11 @@ class FriendTrackerView extends ItemView {
 
 	private formatBirthday(dateStr: string): string {
 		if (!dateStr) return "";
-		const date = new Date(dateStr);
+
+		// Split the date string and create a date object using local timezone
+		const [year, month, day] = dateStr.split("-").map(Number);
+		const date = new Date(year, month - 1, day); // months are 0-based
+
 		if (isNaN(date.getTime())) return dateStr;
 
 		return date.toLocaleDateString("en-US", {
