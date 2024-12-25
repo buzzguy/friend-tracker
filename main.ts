@@ -243,7 +243,9 @@ class FriendTrackerView extends ItemView {
 			}
 
 			// Create table for contacts
-			const table = container.createEl("table");
+			const table = container.createEl("table", {
+				cls: "friend-tracker-table",
+			});
 
 			// Create header row with sort buttons
 			const headerRow = table.createEl("tr");
@@ -257,10 +259,10 @@ class FriendTrackerView extends ItemView {
 				{ key: "formattedBirthday", label: "Birthday", sortable: true },
 				{
 					key: "daysUntilBirthday",
-					label: "Days Until Birthday",
+					label: "Days Left",
 					sortable: true,
 				},
-				{ key: "relationship", label: "Relationship", sortable: true },
+				{ key: "relationship", label: "Type", sortable: true },
 				{ key: "name", label: "", sortable: false }, // Empty label for actions column
 			];
 

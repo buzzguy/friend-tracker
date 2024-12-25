@@ -12,8 +12,9 @@ If your plugin does not need CSS, delete this file.
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 32px;
-	padding: 12px 0;
+	padding: 12px 16px;
 	border-bottom: 2px solid var(--background-modifier-border);
+	width: 100%;
 }
 
 .friend-tracker-header h2 {
@@ -61,32 +62,29 @@ If your plugin does not need CSS, delete this file.
 	background-color: var(--background-modifier-hover);
 }
 
-.friend-tracker-view th {
-	padding: 0;
-	font-weight: var(--font-medium);
-	border-bottom: 2px solid var(--background-modifier-border);
-}
-
+.friend-tracker-view th,
 .friend-tracker-view td {
-	padding: 8px 4px;
+	padding: 8px 12px;
+	text-align: left;
 }
 
 .friend-tracker-sort-button {
 	background: none;
 	border: none;
 	margin: 0;
-	padding: 8px 4px;
+	padding: 8px 0;
 	cursor: pointer;
 	width: 100%;
 	text-align: left;
 	color: var(--text-muted);
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: flex-start;
 	box-shadow: none !important;
 	border-radius: 0;
 	-webkit-appearance: none;
 	font-weight: inherit;
+	gap: 4px;
 }
 
 .friend-tracker-sort-button:hover {
@@ -105,7 +103,7 @@ If your plugin does not need CSS, delete this file.
 .friend-tracker-sort-button .sort-indicator {
 	font-size: 0.8em;
 	opacity: 0.5;
-	margin-left: 4px;
+	margin-left: 0;
 }
 
 .friend-tracker-sort-button:hover .sort-indicator {
@@ -469,6 +467,64 @@ If your plugin does not need CSS, delete this file.
 	margin-top: 16px;
 }
 
-.friend-tracker-view table {
+.friend-tracker-view {
+	display: flex;
+	flex-direction: column;
 	width: 100%;
+	height: 100%;
+}
+
+/* Container for the table */
+.friend-tracker-view > div:not(.friend-tracker-header) {
+	padding: 0 16px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+/* Table styles */
+.friend-tracker-table {
+	width: 100%;
+	table-layout: fixed;
+	border-collapse: collapse;
+	margin: 0;
+}
+
+.friend-tracker-table th,
+.friend-tracker-table td {
+	padding: 8px 12px;
+	text-align: left;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Column widths */
+.friend-tracker-table th:nth-child(1),
+.friend-tracker-table td:nth-child(1) {
+	width: 25%;
+}
+
+.friend-tracker-table th:nth-child(2),
+.friend-tracker-table td:nth-child(2) {
+	width: 10%;
+}
+
+.friend-tracker-table th:nth-child(3),
+.friend-tracker-table td:nth-child(3) {
+	width: 20%;
+}
+
+.friend-tracker-table th:nth-child(4),
+.friend-tracker-table td:nth-child(4) {
+	width: 15%;
+}
+
+.friend-tracker-table th:nth-child(5),
+.friend-tracker-table td:nth-child(5) {
+	width: 20%;
+}
+
+.friend-tracker-table th:nth-child(6),
+.friend-tracker-table td:nth-child(6) {
+	width: 10%;
 }
