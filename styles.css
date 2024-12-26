@@ -15,6 +15,7 @@ If your plugin does not need CSS, delete this file.
 	padding: 12px 16px;
 	border-bottom: 2px solid var(--background-modifier-border);
 	width: 100%;
+	background: none;
 }
 
 .friend-tracker-header h2 {
@@ -69,12 +70,13 @@ If your plugin does not need CSS, delete this file.
 }
 
 .friend-tracker-sort-button {
-	background: none;
+	background: transparent !important;
 	border: none;
 	margin: 0;
 	padding: 8px 0;
 	cursor: pointer;
-	width: 100%;
+	width: auto;
+	min-width: 0;
 	text-align: left;
 	color: var(--text-muted);
 	display: flex;
@@ -89,14 +91,13 @@ If your plugin does not need CSS, delete this file.
 
 .friend-tracker-sort-button:hover {
 	color: var(--text-normal);
-	background: none !important;
-	box-shadow: none !important;
+	background: transparent !important;
 }
 
 .friend-tracker-sort-button:active,
 .friend-tracker-sort-button:focus {
+	background: transparent !important;
 	box-shadow: none !important;
-	background: none !important;
 	outline: none !important;
 }
 
@@ -474,57 +475,49 @@ If your plugin does not need CSS, delete this file.
 	height: 100%;
 }
 
-/* Container for the table */
+/* Container for the table - make it scrollable */
 .friend-tracker-view > div:not(.friend-tracker-header) {
 	padding: 0 16px;
 	width: 100%;
 	box-sizing: border-box;
+	overflow-x: auto; /* Enable horizontal scrolling */
+	-webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+	background: none;
 }
 
 /* Table styles */
 .friend-tracker-table {
 	width: 100%;
-	table-layout: fixed;
+	min-width: 600px;
 	border-collapse: collapse;
 	margin: 0;
+	table-layout: auto;
 }
 
+/* Base styles for all cells */
 .friend-tracker-table th,
 .friend-tracker-table td {
 	padding: 8px 12px;
 	text-align: left;
 	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 }
 
-/* Column widths */
+/* Remove all the flex-related styles */
+.friend-tracker-table tr {
+	/* Remove display: flex */
+}
+
 .friend-tracker-table th:nth-child(1),
-.friend-tracker-table td:nth-child(1) {
-	width: 25%;
-}
-
+.friend-tracker-table td:nth-child(1),
 .friend-tracker-table th:nth-child(2),
-.friend-tracker-table td:nth-child(2) {
-	width: 10%;
-}
-
+.friend-tracker-table td:nth-child(2),
 .friend-tracker-table th:nth-child(3),
-.friend-tracker-table td:nth-child(3) {
-	width: 20%;
-}
-
+.friend-tracker-table td:nth-child(3),
 .friend-tracker-table th:nth-child(4),
-.friend-tracker-table td:nth-child(4) {
-	width: 15%;
-}
-
+.friend-tracker-table td:nth-child(4),
 .friend-tracker-table th:nth-child(5),
-.friend-tracker-table td:nth-child(5) {
-	width: 20%;
-}
-
+.friend-tracker-table td:nth-child(5),
 .friend-tracker-table th:nth-child(6),
 .friend-tracker-table td:nth-child(6) {
-	width: 10%;
+	/* Remove width and flex properties */
 }
