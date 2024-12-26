@@ -12,6 +12,7 @@ import {
 	Modal,
 	setIcon,
 	EventRef,
+	Platform,
 } from "obsidian";
 
 const VIEW_TYPE_FRIEND_TRACKER = "friend-tracker-view";
@@ -507,6 +508,11 @@ class FriendTrackerView extends ItemView {
 				state: { filePath: file.path },
 			});
 			this.app.workspace.revealLeaf(leaf);
+
+			// On mobile, collapse the right split where Friend Tracker is
+			if (Platform.isMobile) {
+				this.app.workspace.rightSplit.collapse();
+			}
 		}
 	}
 
