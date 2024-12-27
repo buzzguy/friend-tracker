@@ -824,12 +824,28 @@ class ContactPageView extends ItemView {
 			if (!this.file?.parent) return;
 			const newName = nameInput.value.trim();
 			if (newName) {
+				// Update the name in contactData
 				this.contactData.name = newName;
 
+				// First save the updated YAML data
+				await this.saveContactData();
+
+				// Then rename the file
 				const newPath = `${this.file.parent.path}/${newName}.md`;
 				try {
 					await this.app.fileManager.renameFile(this.file, newPath);
 					new Notice(`Updated contact name`);
+
+					// Find and refresh the Friend Tracker view
+					const friendTrackerLeaves =
+						this.app.workspace.getLeavesOfType(
+							VIEW_TYPE_FRIEND_TRACKER
+						);
+					if (friendTrackerLeaves.length > 0) {
+						const friendTrackerView = friendTrackerLeaves[0]
+							.view as FriendTrackerView;
+						await friendTrackerView.refresh();
+					}
 				} catch (error) {
 					new Notice(`Error updating file name: ${error}`);
 				}
