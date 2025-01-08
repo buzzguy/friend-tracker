@@ -392,7 +392,8 @@ If your plugin does not need CSS, delete this file.
 	line-height: 1.6;
 	resize: none;
 	transition: border-color 0.15s ease;
-	height: var(--textarea-height, auto);
+	height: var(--scroll-height, auto);
+	min-height: 100px;
 	overflow: hidden;
 	transition: height 0.1s ease;
 }
@@ -417,6 +418,10 @@ If your plugin does not need CSS, delete this file.
 
 .contact-notes-input[data-height] {
 	height: attr(data-height px);
+}
+
+.contact-notes-input.measuring {
+	height: 0 !important;
 }
 
 .friend-tracker-name-cell {

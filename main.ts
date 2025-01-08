@@ -1205,10 +1205,15 @@ class ContactPageView extends ItemView {
 	}
 
 	private adjustTextareaHeight(textarea: HTMLTextAreaElement) {
-		// Reset height temporarily to get the correct scrollHeight
-		textarea.style.height = "0";
-		// Set the height to scrollHeight + border width
-		textarea.style.height = textarea.scrollHeight + "px";
+		// Add class to trigger measurement
+		textarea.classList.add("measuring");
+		// Store the scrollHeight as a CSS custom property
+		textarea.style.setProperty(
+			"--scroll-height",
+			`${textarea.scrollHeight}px`
+		);
+		// Remove measurement class
+		textarea.classList.remove("measuring");
 	}
 }
 
