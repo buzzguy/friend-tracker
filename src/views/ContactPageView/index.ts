@@ -106,10 +106,11 @@ export class ContactPageView extends ItemView {
 						this.app.workspace.getLeavesOfType(
 							VIEW_TYPE_FRIEND_TRACKER
 						);
-					if (friendTrackerLeaves.length > 0) {
-						const view = friendTrackerLeaves[0].view;
+					for (const leaf of friendTrackerLeaves) {
+						const view = await leaf.view;
 						if (view instanceof FriendTrackerView) {
 							await view.refresh();
+							break;
 						}
 					}
 				} catch (error) {

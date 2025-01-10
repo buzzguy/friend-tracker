@@ -42,19 +42,24 @@ export default class FriendTracker extends Plugin {
 					VIEW_TYPE_FRIEND_TRACKER
 				);
 
-				if (leaves.length > 0) {
-					workspace.revealLeaf(leaves[0]);
-				} else {
-					const leaf = workspace.getRightLeaf(false);
-					if (leaf) {
-						await leaf.setViewState({
-							type: VIEW_TYPE_FRIEND_TRACKER,
-							active: true,
-						});
+				// Check for existing view, handling deferred views
+				for (const leaf of leaves) {
+					const view = await leaf.view;
+					if (view instanceof FriendTrackerView) {
 						workspace.revealLeaf(leaf);
-					} else {
-						new Notice("Could not create Friend Tracker view");
+						return;
 					}
+				}
+
+				const leaf = workspace.getRightLeaf(false);
+				if (leaf) {
+					await leaf.setViewState({
+						type: VIEW_TYPE_FRIEND_TRACKER,
+						active: true,
+					});
+					workspace.revealLeaf(leaf);
+				} else {
+					new Notice("Could not create Friend Tracker view");
 				}
 			});
 
