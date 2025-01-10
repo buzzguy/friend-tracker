@@ -1,9 +1,9 @@
 {
 	"id": "friend-tracker",
 	"name": "Friend Tracker",
-	"version": "1.1.0",
-	"minAppVersion": "0.15.0",
-	"description": "Keep track of friends, birthdays, and interactions",
+	"version": "1.2.0",
+	"minAppVersion": "1.4.14",
+	"description": "Keep track of friends and family birthdays, and set reminders to stay in touch.",
 	"author": "Dan Au <dan@dausign.com>",
 	"authorUrl": "https://dausign.com",
 	"isDesktopOnly": false
