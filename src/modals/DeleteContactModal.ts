@@ -12,7 +12,7 @@ export class DeleteContactModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.createEl("h2", { text: "Delete Contact" });
+		contentEl.createEl("h2", { text: "Delete contact" });
 		contentEl.createEl("p", {
 			text: `Are you sure you want to delete ${this.file.basename}?`,
 		});
