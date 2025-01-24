@@ -52,7 +52,7 @@ export class TableView {
 		}> = [
 			{ key: "name", label: "Name", sortable: true },
 			{ key: "age", label: "Age", sortable: true },
-			{ key: "formattedBirthday", label: "Birthday", sortable: true },
+			{ key: "birthday", label: "Birthday", sortable: true },
 			{ key: "daysUntilBirthday", label: "Days left", sortable: true },
 			{ key: "relationship", label: "Type", sortable: true },
 			{ key: "name", label: "", sortable: false },
@@ -94,22 +94,10 @@ export class TableView {
 		contacts: ContactWithCountdown[]
 	) {
 		// Sort contacts based on current sort configuration
-		const sortedContacts = [...contacts].sort((a, b) => {
-			const aValue = a[this.view.currentSort.column];
-			const bValue = b[this.view.currentSort.column];
-
-			// Handle null/undefined values
-			if (aValue == null) return 1;
-			if (bValue == null) return -1;
-
-			// Compare values
-			const direction =
-				this.view.currentSort.direction === "asc" ? 1 : -1;
-			if (typeof aValue === "number" && typeof bValue === "number") {
-				return (aValue - bValue) * direction;
-			}
-			return String(aValue).localeCompare(String(bValue)) * direction;
-		});
+		const sortedContacts = this.sortContacts(
+			contacts,
+			this.view.currentSort
+		);
 
 		sortedContacts.forEach((contact) => {
 			const row = table.createEl("tr") as HTMLTableRowElement;
@@ -153,6 +141,37 @@ export class TableView {
 				e.stopPropagation();
 				this.view.openDeleteModal(contact.file);
 			});
+		});
+	}
+
+	private sortContacts(contacts: ContactWithCountdown[], sort: SortConfig) {
+		return [...contacts].sort((a, b) => {
+			if (sort.column === "birthday") {
+				// Extract month and day from birthday strings
+				const dateA = new Date(a.birthday);
+				const dateB = new Date(b.birthday);
+
+				const aValue = (dateA.getMonth() + 1) * 100 + dateA.getDate();
+				const bValue = (dateB.getMonth() + 1) * 100 + dateB.getDate();
+
+				return sort.direction === "asc"
+					? aValue - bValue
+					: bValue - aValue;
+			}
+
+			// Existing sorting logic for other columns
+			const aValue = a[sort.column];
+			const bValue = b[sort.column];
+
+			if (typeof aValue === "string" && typeof bValue === "string") {
+				return sort.direction === "asc"
+					? aValue.localeCompare(bValue)
+					: bValue.localeCompare(aValue);
+			}
+
+			return sort.direction === "asc"
+				? (aValue as number) - (bValue as number)
+				: (bValue as number) - (aValue as number);
 		});
 	}
 }
