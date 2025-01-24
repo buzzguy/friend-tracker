@@ -80,16 +80,13 @@ export class FriendTrackerView extends ItemView {
 	}
 
 	async onOpen() {
-		if (this.fileChangeHandler) {
-			this.app.vault.offref(this.fileChangeHandler);
-			this.fileChangeHandler = null;
-		}
-
-		this.fileChangeHandler = this.app.vault.on("modify", (file) => {
-			if (file instanceof TFile && this.isContactFile(file)) {
-				setTimeout(() => this.refresh(), 100);
-			}
-		});
+		this.registerEvent(
+			this.app.vault.on("modify", (file) => {
+				if (file instanceof TFile && this.isContactFile(file)) {
+					setTimeout(() => this.refresh(), 100);
+				}
+			})
+		);
 
 		await this.refresh();
 	}
