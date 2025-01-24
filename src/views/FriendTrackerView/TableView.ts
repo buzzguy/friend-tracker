@@ -14,7 +14,7 @@ export class TableView {
 		const headerContainer = container.createEl("div", {
 			cls: "friend-tracker-header",
 		});
-		headerContainer.createEl("h2", { text: "Friend Tracker" });
+		headerContainer.createEl("h2", { text: "Friend tracker" });
 
 		const addButton = headerContainer.createEl("button", {
 			text: "Add contact",
