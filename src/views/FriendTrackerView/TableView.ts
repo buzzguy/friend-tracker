@@ -16,6 +16,23 @@ export class TableView {
 		});
 		headerContainer.createEl("h2", { text: "Friend tracker" });
 
+		// Add Search Bar
+		const searchBar = headerContainer.createEl("input", {
+			text: "Search",
+			cls: "contact-field-input",
+			attr: {
+				type: "text",
+				placeholder: "Search",
+				value: this.view.searchText
+			}
+		});
+
+		this.view.searchBarEl = searchBar;
+
+		searchBar.addEventListener("input", () => {
+			this.view.handleSearch(searchBar.value || "");
+		});
+
 		const addButton = headerContainer.createEl("button", {
 			text: "Add contact",
 			cls: "friend-tracker-add-button",
@@ -99,7 +116,13 @@ export class TableView {
 			this.view.currentSort
 		);
 
-		sortedContacts.forEach((contact) => {
+		// Filter
+		const filteredContacts = this.filterContacts(
+			sortedContacts,
+			this.view.searchText
+		);
+
+		filteredContacts.forEach((contact) => {
 			const row = table.createEl("tr") as HTMLTableRowElement;
 
 			// Create name cell with click handler
@@ -141,6 +164,13 @@ export class TableView {
 				e.stopPropagation();
 				this.view.openDeleteModal(contact.file);
 			});
+		});
+	}
+
+	private filterContacts(contacts: ContactWithCountdown[], searchText: string) {
+		// Filter by Search Input
+		return contacts.filter(contact => {
+			return contact.name.contains(searchText);
 		});
 	}
 

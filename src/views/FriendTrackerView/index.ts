@@ -14,6 +14,10 @@ export class FriendTrackerView extends ItemView {
 		column: "age",
 		direction: "asc",
 	};
+
+	searchText = "";
+	searchBarEl: HTMLInputElement;
+
 	private tableView: TableView;
 	private contactOps: ContactOperations;
 	private fileChangeHandler: EventRef | null = null;
@@ -30,6 +34,18 @@ export class FriendTrackerView extends ItemView {
 	public async openAddContactModal() {
 		const modal = new AddContactModal(this.app, this.plugin);
 		modal.open();
+	}
+	public handleSearch(searchInput: string) {
+		this.searchText = searchInput;
+		this.refresh()
+			.then(() => {
+				this.searchBarEl.focus()
+
+				// Set Cursor at the End of the Text
+				const val = this.searchBarEl.value; //store the value of the element
+				this.searchBarEl.value = ''; //clear the value of the element
+				this.searchBarEl.value = val; //set that value back.
+			});
 	}
 
 	public handleSort(column: keyof Omit<ContactWithCountdown, "file">) {

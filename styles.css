@@ -11,6 +11,7 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	gap: 1rem;
 	margin-bottom: 32px;
 	padding: 12px 16px;
 	border-bottom: 2px solid var(--background-modifier-border);
