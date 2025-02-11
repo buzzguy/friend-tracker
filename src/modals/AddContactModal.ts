@@ -1,9 +1,10 @@
 import { App, Modal, Notice } from "obsidian";
 import type FriendTracker from "@/main";
 import { stringifyYaml } from "obsidian";
+import {FriendTrackerView} from "@/views/FriendTrackerView";
 
 export class AddContactModal extends Modal {
-	constructor(app: App, private plugin: FriendTracker) {
+	constructor(app: App, private plugin: FriendTracker, private view: FriendTrackerView) {
 		super(app);
 	}
 
@@ -130,6 +131,9 @@ export class AddContactModal extends Modal {
 			.create(filePath, fileContent)
 			.then(() => {
 				new Notice(`Created contact: ${data.name}`);
+
+				// Wait for the system to recognize the file
+				setTimeout(() => this.view.refresh(), 100);
 			})
 			.catch((error) => {
 				new Notice(`Error creating contact: ${error}`);

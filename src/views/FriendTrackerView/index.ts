@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, EventRef, TFile, Platform } from "obsidian";
+import {ItemView, WorkspaceLeaf, EventRef, TFile, Platform, Notice} from "obsidian";
 import type FriendTracker from "@/main";
 import { TableView } from "./TableView";
 import { ContactOperations } from "@/services/ContactOperations";
@@ -32,7 +32,7 @@ export class FriendTrackerView extends ItemView {
 	// ... rest of the implementation from earlier
 
 	public async openAddContactModal() {
-		const modal = new AddContactModal(this.app, this.plugin);
+		const modal = new AddContactModal(this.app, this.plugin, this);
 		modal.open();
 	}
 	public handleSearch(searchInput: string) {
@@ -110,6 +110,8 @@ export class FriendTrackerView extends ItemView {
 	async refresh() {
 		if (this.isRefreshing) return;
 		this.isRefreshing = true;
+
+		new Notice("Refreshed!")
 
 		try {
 			const contacts = await this.contactOps.getContacts();
