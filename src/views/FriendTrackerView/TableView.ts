@@ -16,7 +16,7 @@ export class TableView {
 		});
 		headerContainer.createEl("h2", { text: "Friend tracker" });
 
-		// Add Search Bar
+		// Create Search Bar
 		const searchBar = headerContainer.createEl("input", {
 			text: "Search",
 			cls: "contact-field-input",
@@ -33,6 +33,25 @@ export class TableView {
 			this.view.handleSearch(searchBar.value || "");
 		});
 
+		// Create Relationship Dropdown
+		const relationshipDropDown = headerContainer.createEl("select");
+
+		const contactTypes = (await this.view.getContactTypesList()) ?? []
+		const contactItems = contactTypes.map(type => ({text: type, value: type}))
+
+		contactItems.unshift({text: "No Relationship Filter", value: "index"})
+
+		contactItems.forEach(({ text, value }) => {
+			relationshipDropDown.appendChild(new Option(text, value));
+		});
+
+		relationshipDropDown.value = this.view.relationshipFilter;
+
+		relationshipDropDown.addEventListener("change", () => {
+			this.view.handleFilterRelationship(relationshipDropDown.value);
+		});
+
+		// Create Add Contact Button
 		const addButton = headerContainer.createEl("button", {
 			text: "Add contact",
 			cls: "friend-tracker-add-button",
@@ -119,7 +138,8 @@ export class TableView {
 		// Filter
 		const filteredContacts = this.filterContacts(
 			sortedContacts,
-			this.view.searchText
+			this.view.searchText,
+			this.view.relationshipFilter
 		);
 
 		filteredContacts.forEach((contact) => {
@@ -167,11 +187,23 @@ export class TableView {
 		});
 	}
 
-	private filterContacts(contacts: ContactWithCountdown[], searchText: string) {
-		// Filter by Search Input
-		return contacts.filter(contact => {
-			return contact.name.contains(searchText);
-		});
+	private filterContacts(contacts: ContactWithCountdown[], searchText: string, relationshipFilter: string) {
+		// Apply Filters
+		return contacts
+			.filter(this.searchFilter(searchText))
+			.filter(this.relationshipFilter(relationshipFilter));
+	}
+
+	// Filter function Factories
+	private searchFilter = (searchText: string) => {
+		return (contact: ContactWithCountdown) => contact.name.contains(searchText);
+	}
+
+	private relationshipFilter = (relationship: string) => {
+		return (contact: ContactWithCountdown) => {
+			if(relationship === "index") return true
+			return contact.relationship === relationship
+		};
 	}
 
 	private sortContacts(contacts: ContactWithCountdown[], sort: SortConfig) {

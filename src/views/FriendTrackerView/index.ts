@@ -18,6 +18,8 @@ export class FriendTrackerView extends ItemView {
 	searchText = "";
 	searchBarEl: HTMLInputElement;
 
+	relationshipFilter = "index";
+
 	private tableView: TableView;
 	private contactOps: ContactOperations;
 	private fileChangeHandler: EventRef | null = null;
@@ -46,6 +48,11 @@ export class FriendTrackerView extends ItemView {
 				this.searchBarEl.value = ''; //clear the value of the element
 				this.searchBarEl.value = val; //set that value back.
 			});
+	}
+
+	public handleFilterRelationship(relationshipFilter: string) {
+		this.relationshipFilter = relationshipFilter;
+		this.refresh();
 	}
 
 	public handleSort(column: keyof Omit<ContactWithCountdown, "file">) {
@@ -111,8 +118,6 @@ export class FriendTrackerView extends ItemView {
 		if (this.isRefreshing) return;
 		this.isRefreshing = true;
 
-		new Notice("Refreshed!")
-
 		try {
 			const contacts = await this.contactOps.getContacts();
 			const container = this.containerEl.children[1];
@@ -130,5 +135,9 @@ export class FriendTrackerView extends ItemView {
 	private isContactFile(file: TFile): boolean {
 		const contactFolder = this.plugin.settings.contactsFolder;
 		return file.path.startsWith(contactFolder + "/");
+	}
+
+	public async getContactTypesList() {
+		return this.contactOps.getContactTypes();
 	}
 }

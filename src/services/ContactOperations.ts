@@ -103,4 +103,14 @@ export class ContactOperations {
 
 		return diffDays;
 	}
+
+	public async getContactTypes() {
+		const contacts = await this.getContacts();
+		const relationships = contacts
+			.map((contact) => contact.relationship)
+			.filter((relationship) => relationship);
+
+		// Create Set to remove duplicates
+		return Array.from(new Set(relationships));
+	}
 }
