@@ -11,7 +11,7 @@ export const VIEW_TYPE_FRIEND_TRACKER = "friend-tracker-view";
 
 export class FriendTrackerView extends ItemView {
 	currentSort: SortConfig = {
-		column: "age",
+		column: "daysUntilBirthday",
 		direction: "asc",
 	};
 	private tableView: TableView;
