@@ -98,7 +98,7 @@ export class ContactOperations {
 			Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
 		);
 		// Create this year's birthday in UTC
-		let birthdayUTC = new Date(
+		const birthdayUTC = new Date(
 			Date.UTC(
 				today.getFullYear(),
 				birthDate.getUTCMonth(),

@@ -49,7 +49,7 @@ export class ContactFields {
 
 		input.addEventListener("input", (e) => {
 			const target = e.target as HTMLInputElement;
-			target.value = target.value.replace(/[^0-9+\-]/g, ""); // Keep only numbers, +, and -
+			target.value = target.value.replace(/[^0-9+-]/g, ""); // Keep only numbers, +, and -
 		});
 
 		input.addEventListener("change", async () => {
