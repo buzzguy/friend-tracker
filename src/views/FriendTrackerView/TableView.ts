@@ -156,6 +156,19 @@ export class TableView {
 
 	private sortContacts(contacts: ContactWithCountdown[], sort: SortConfig) {
 		return [...contacts].sort((a, b) => {
+			if (sort.column === "birthday") {
+				// Extract month and day from birthday strings
+				const dateA = new Date(a.birthday);
+				const dateB = new Date(b.birthday);
+
+				const aValue = (dateA.getMonth() + 1) * 100 + dateA.getDate();
+				const bValue = (dateB.getMonth() + 1) * 100 + dateB.getDate();
+
+				return sort.direction === "asc"
+					? aValue - bValue
+					: bValue - aValue;
+			}
+
 			const aValue = a[sort.column];
 			const bValue = b[sort.column];
 
