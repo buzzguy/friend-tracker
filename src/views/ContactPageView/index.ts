@@ -150,9 +150,29 @@ export class ContactPageView extends ItemView {
 			cls: "contact-name-display",
 		});
 
-		const nameText = nameDisplay.createEl("h1", {
+		const nameRow = nameDisplay.createEl("div", {
+			cls: "contact-name-row",
+		});
+
+		const nameText = nameRow.createEl("h1", {
 			text: this.contactData.name || "Unnamed Contact",
 		});
+
+		const editButton = nameRow.createEl("button", {
+			cls: "contact-name-edit",
+		});
+		setIcon(editButton, "pencil");
+
+		// Add age display if birthday exists
+		if (this.contactData.birthday) {
+			const ageText = this.calculateDetailedAge(
+				this.contactData.birthday
+			);
+			nameDisplay.createEl("div", {
+				text: ageText,
+				cls: "contact-age-display",
+			});
+		}
 
 		const nameInput = nameDisplay.createEl("input", {
 			type: "text",
@@ -160,11 +180,6 @@ export class ContactPageView extends ItemView {
 			placeholder: "Contact name",
 			cls: "contact-name-input",
 		});
-
-		const editButton = nameDisplay.createEl("button", {
-			cls: "contact-name-edit",
-		});
-		setIcon(editButton, "pencil");
 
 		editButton.addEventListener("click", () => {
 			if (!nameInput.classList.contains("editing")) {
@@ -218,6 +233,30 @@ export class ContactPageView extends ItemView {
 		};
 
 		nameInput.addEventListener("change", saveNameChange);
+	}
+
+	private calculateDetailedAge(birthday: string): string {
+		const birthDate = new Date(birthday + "T00:00:00Z");
+		const today = new Date();
+		const todayUTC = new Date(
+			Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+		);
+
+		let years = todayUTC.getUTCFullYear() - birthDate.getUTCFullYear();
+		let months = todayUTC.getUTCMonth() - birthDate.getUTCMonth();
+
+		// Adjust for day of month
+		if (todayUTC.getUTCDate() < birthDate.getUTCDate()) {
+			months--;
+		}
+
+		// Handle negative months
+		if (months < 0) {
+			years--;
+			months += 12;
+		}
+
+		return `${years} years, ${months} months old`;
 	}
 
 	private renderNotesSection(container: HTMLElement) {
