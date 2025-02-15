@@ -82,25 +82,31 @@ export class ContactOperations {
 		if (!birthday) return null;
 
 		const today = new Date();
-		const birthDate = new Date(birthday);
+		// Use UTC methods to avoid timezone issues
+		const birthDate = new Date(birthday + "T00:00:00Z");
+
 		if (isNaN(birthDate.getTime())) return null;
 
-		// Create this year's birthday
-		const thisYearBirthday = new Date(
-			today.getFullYear(),
-			birthDate.getMonth(),
-			birthDate.getDate()
+		// Get today's date in UTC
+		const todayUTC = new Date(
+			Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+		);
+		// Create this year's birthday in UTC
+		let birthdayUTC = new Date(
+			Date.UTC(
+				today.getFullYear(),
+				birthDate.getUTCMonth(),
+				birthDate.getUTCDate()
+			)
 		);
 
-		// If this year's birthday has passed, use next year's birthday
-		if (thisYearBirthday < today) {
-			thisYearBirthday.setFullYear(today.getFullYear() + 1);
+		// If this year's birthday has already passed, use next year's birthday
+		if (birthdayUTC < todayUTC) {
+			birthdayUTC.setUTCFullYear(todayUTC.getUTCFullYear() + 1);
 		}
 
 		// Calculate days difference
-		const diffTime = thisYearBirthday.getTime() - today.getTime();
-		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-		return diffDays;
+		const diffTime = birthdayUTC.getTime() - todayUTC.getTime();
+		return Math.round(diffTime / (1000 * 60 * 60 * 24)); // Round to avoid fractional days
 	}
 }
