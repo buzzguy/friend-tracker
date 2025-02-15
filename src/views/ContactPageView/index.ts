@@ -1,12 +1,12 @@
-import { ItemView, WorkspaceLeaf, Notice, TFile } from "obsidian";
+import { ItemView, WorkspaceLeaf, Notice, TFile, setIcon } from "obsidian";
 import type FriendTracker from "@/main";
 import { ContactFields } from "@/components/ContactFields";
 import { InteractionView } from "@/components/InteractionView";
 import type { Interaction } from "@/types";
-import { VIEW_TYPE_FRIEND_TRACKER } from "@/views/FriendTrackerView";
-import { FriendTrackerView } from "@/views/FriendTrackerView";
 import { AddFieldModal } from "@/modals/AddFieldModal";
 import { InteractionModal } from "@/modals/InteractionModal";
+import { VIEW_TYPE_FRIEND_TRACKER } from "@/views/FriendTrackerView";
+import { FriendTrackerView } from "@/views/FriendTrackerView";
 
 export const VIEW_TYPE_CONTACT_PAGE = "contact-page-view";
 
@@ -79,45 +79,7 @@ export class ContactPageView extends ItemView {
 			cls: "contact-name-container",
 		});
 
-		const nameInput = nameContainer.createEl("input", {
-			cls: "contact-name-input",
-			attr: {
-				type: "text",
-				value: this.contactData.name || "",
-				placeholder: "Contact name",
-			},
-		});
-
-		// Handle name changes
-		nameInput.addEventListener("change", async () => {
-			if (!this._file?.parent) return;
-			const newName = nameInput.value.trim();
-			if (newName) {
-				this.contactData.name = newName;
-				await this.saveContactData();
-
-				const newPath = `${this._file.parent.path}/${newName}.md`;
-				try {
-					await this.app.fileManager.renameFile(this._file, newPath);
-					new Notice(`Updated contact name`);
-
-					// Find and refresh the Friend Tracker view
-					const friendTrackerLeaves =
-						this.app.workspace.getLeavesOfType(
-							VIEW_TYPE_FRIEND_TRACKER
-						);
-					for (const leaf of friendTrackerLeaves) {
-						const view = await leaf.view;
-						if (view instanceof FriendTrackerView) {
-							await view.refresh();
-							break;
-						}
-					}
-				} catch (error) {
-					new Notice(`Error updating file name: ${error}`);
-				}
-			}
-		});
+		this.renderNameSection(nameContainer);
 
 		// Basic Info Section
 		const infoSection = container.createEl("div", {
@@ -177,6 +139,124 @@ export class ContactPageView extends ItemView {
 
 		// Interactions Section
 		this.renderInteractionsSection(container);
+	}
+
+	private renderNameSection(container: HTMLElement) {
+		const nameSection = container.createEl("div", {
+			cls: "contact-name-section",
+		});
+
+		const nameDisplay = nameSection.createEl("div", {
+			cls: "contact-name-display",
+		});
+
+		const editContainer = nameDisplay.createEl("div", {
+			cls: "contact-name-row",
+		});
+
+		const nameText = editContainer.createEl("h1", {
+			text: this.contactData.name || "Unnamed Contact",
+		});
+
+		const nameInput = editContainer.createEl("input", {
+			type: "text",
+			value: this.contactData.name || "",
+			placeholder: "Contact name",
+			cls: "contact-name-input",
+		});
+
+		const editButton = editContainer.createEl("button", {
+			cls: "contact-name-edit",
+		});
+		setIcon(editButton, "pencil");
+
+		// Add age display if birthday exists
+		if (this.contactData.birthday) {
+			const ageText = this.calculateDetailedAge(
+				this.contactData.birthday
+			);
+			nameDisplay.createEl("div", {
+				text: ageText,
+				cls: "contact-age-display",
+			});
+		}
+
+		editButton.addEventListener("click", () => {
+			if (!nameInput.classList.contains("editing")) {
+				nameText.classList.add("editing");
+				nameInput.classList.add("editing");
+				setIcon(editButton, "checkmark");
+				nameInput.focus();
+			} else {
+				saveNameChange();
+			}
+		});
+
+		const saveNameChange = async () => {
+			if (!this._file) return;
+			const newName = nameInput.value.trim();
+			if (newName) {
+				this.contactData.name = nameInput.value;
+				await this.saveContactData();
+
+				// Rename the file
+				if (this._file.parent) {
+					const newPath = `${this._file.parent.path}/${newName}.md`;
+					try {
+						await this.app.fileManager.renameFile(
+							this._file,
+							newPath
+						);
+						new Notice(`Updated contact name`);
+
+						// Refresh Friend Tracker view
+						const friendTrackerLeaves =
+							this.app.workspace.getLeavesOfType(
+								VIEW_TYPE_FRIEND_TRACKER
+							);
+						for (const leaf of friendTrackerLeaves) {
+							const view = await leaf.view;
+							if (view instanceof FriendTrackerView) {
+								await view.refresh();
+								break;
+							}
+						}
+					} catch (error) {
+						new Notice(`Error updating file name: ${error}`);
+					}
+				}
+			}
+			nameText.textContent = nameInput.value || "Unnamed Contact";
+			nameText.classList.remove("editing");
+			nameInput.classList.remove("editing");
+			setIcon(editButton, "pencil");
+		};
+
+		nameInput.addEventListener("change", saveNameChange);
+	}
+
+	private calculateDetailedAge(birthday: string): string {
+		const birthDate = new Date(birthday + "T00:00:00Z");
+		const today = new Date();
+		const todayUTC = new Date(
+			Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+		);
+
+		let years = todayUTC.getUTCFullYear() - birthDate.getUTCFullYear();
+		let months = todayUTC.getUTCMonth() - birthDate.getUTCMonth();
+
+		// Adjust for day of month
+		if (todayUTC.getUTCDate() < birthDate.getUTCDate()) {
+			months--;
+		}
+
+		// Handle negative months
+		if (months < 0) {
+			years--;
+			months += 12;
+		}
+
+		return `${years} years, ${months} months old`;
 	}
 
 	private renderNotesSection(container: HTMLElement) {
@@ -242,6 +322,14 @@ export class ContactPageView extends ItemView {
 
 	async saveContactData() {
 		if (!this._file) return;
+
+		// Sort interactions by date in descending order (newest first)
+		if (this.contactData.interactions) {
+			this.contactData.interactions.sort(
+				(a: Interaction, b: Interaction) =>
+					new Date(b.date).getTime() - new Date(a.date).getTime()
+			);
+		}
 
 		await this.app.fileManager.processFrontMatter(
 			this._file,

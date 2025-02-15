@@ -2,6 +2,8 @@ import { TFile } from "obsidian";
 
 export interface FriendTrackerSettings {
 	contactsFolder: string;
+	defaultSortColumn: keyof Omit<ContactWithCountdown, "file">;
+	defaultSortDirection: "asc" | "desc";
 }
 
 export interface Contact {
@@ -15,6 +17,7 @@ export interface Contact {
 export interface ContactWithCountdown extends Contact {
 	formattedBirthday: string;
 	daysUntilBirthday: number | null;
+	lastInteraction: string | null;
 }
 
 export interface SortConfig {
@@ -29,4 +32,6 @@ export interface Interaction {
 
 export const DEFAULT_SETTINGS: FriendTrackerSettings = {
 	contactsFolder: "FriendTracker",
+	defaultSortColumn: "daysUntilBirthday",
+	defaultSortDirection: "asc",
 };
