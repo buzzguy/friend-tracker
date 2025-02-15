@@ -56,6 +56,7 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 			{ value: "birthday", label: "Birthday" },
 			{ value: "daysUntilBirthday", label: "Days until birthday" },
 			{ value: "relationship", label: "Relationship" },
+			{ value: "lastInteraction", label: "Last interaction" },
 		];
 
 		new Setting(containerEl)
