@@ -17,6 +17,7 @@ export interface Contact {
 export interface ContactWithCountdown extends Contact {
 	formattedBirthday: string;
 	daysUntilBirthday: number | null;
+	lastInteraction: string | null;
 }
 
 export interface SortConfig {

@@ -243,6 +243,14 @@ export class ContactPageView extends ItemView {
 	async saveContactData() {
 		if (!this._file) return;
 
+		// Sort interactions by date in descending order (newest first)
+		if (this.contactData.interactions) {
+			this.contactData.interactions.sort(
+				(a: Interaction, b: Interaction) =>
+					new Date(b.date).getTime() - new Date(a.date).getTime()
+			);
+		}
+
 		await this.app.fileManager.processFrontMatter(
 			this._file,
 			(frontmatter) => {

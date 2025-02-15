@@ -27,6 +27,11 @@ export class ContactOperations {
 				this.plugin.app.metadataCache.getFileCache(file)?.frontmatter;
 
 			if (metadata) {
+				const lastInteraction =
+					metadata.interactions?.length > 0
+						? this.formatDaysAgo(metadata.interactions[0].date)
+						: null;
+
 				contacts.push({
 					name: metadata.name || "Unknown",
 					birthday: metadata.birthday || "",
@@ -36,6 +41,7 @@ export class ContactOperations {
 					daysUntilBirthday: this.calculateDaysUntilBirthday(
 						metadata.birthday
 					),
+					lastInteraction,
 					file,
 				});
 			}
@@ -108,5 +114,14 @@ export class ContactOperations {
 		// Calculate days difference
 		const diffTime = birthdayUTC.getTime() - todayUTC.getTime();
 		return Math.round(diffTime / (1000 * 60 * 60 * 24)); // Round to avoid fractional days
+	}
+
+	private formatDaysAgo(dateStr: string): string {
+		const date = new Date(dateStr);
+		const today = new Date();
+		const diffTime = today.getTime() - date.getTime();
+		const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+		return `${diffDays} days`;
 	}
 }
