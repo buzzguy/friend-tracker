@@ -381,12 +381,14 @@ If your plugin does not need CSS, delete this file.
 .contact-name-row {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	width: 100%;
 }
 
-.contact-name-display h1 {
+.contact-name-display h1,
+.contact-name-input {
+	width: calc(100% - 40px); /* Leave space for button */
 	margin: 0;
-	flex: 1;
 }
 
 .contact-name-display h1.editing {
@@ -406,7 +408,7 @@ If your plugin does not need CSS, delete this file.
 	align-items: center;
 	justify-content: center;
 	transition: color 0.2s ease;
-	flex-shrink: 0;
+	margin-left: 8px;
 }
 
 .contact-name-edit:hover {

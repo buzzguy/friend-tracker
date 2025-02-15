@@ -150,15 +150,22 @@ export class ContactPageView extends ItemView {
 			cls: "contact-name-display",
 		});
 
-		const nameRow = nameDisplay.createEl("div", {
+		const editContainer = nameDisplay.createEl("div", {
 			cls: "contact-name-row",
 		});
 
-		const nameText = nameRow.createEl("h1", {
+		const nameText = editContainer.createEl("h1", {
 			text: this.contactData.name || "Unnamed Contact",
 		});
 
-		const editButton = nameRow.createEl("button", {
+		const nameInput = editContainer.createEl("input", {
+			type: "text",
+			value: this.contactData.name || "",
+			placeholder: "Contact name",
+			cls: "contact-name-input",
+		});
+
+		const editButton = editContainer.createEl("button", {
 			cls: "contact-name-edit",
 		});
 		setIcon(editButton, "pencil");
@@ -173,13 +180,6 @@ export class ContactPageView extends ItemView {
 				cls: "contact-age-display",
 			});
 		}
-
-		const nameInput = nameDisplay.createEl("input", {
-			type: "text",
-			value: this.contactData.name || "",
-			placeholder: "Contact name",
-			cls: "contact-name-input",
-		});
 
 		editButton.addEventListener("click", () => {
 			if (!nameInput.classList.contains("editing")) {
