@@ -42,26 +42,14 @@ export class ContactFields {
 			attr: {
 				type: "tel",
 				value: value || "",
-				placeholder: "000-000-0000",
-				pattern: "[0-9]{3}-[0-9]{3}-[0-9]{4}",
+				placeholder: "+1234567890",
+				pattern: "^[0-9+\\-]*$", // Allow only numbers, +, and -
 			},
 		});
 
 		input.addEventListener("input", (e) => {
 			const target = e.target as HTMLInputElement;
-			const value = target.value.replace(/\D/g, "");
-			if (value.length > 0) {
-				if (value.length <= 3) {
-					target.value = value;
-				} else if (value.length <= 6) {
-					target.value = `${value.slice(0, 3)}-${value.slice(3)}`;
-				} else {
-					target.value = `${value.slice(0, 3)}-${value.slice(
-						3,
-						6
-					)}-${value.slice(6, 10)}`;
-				}
-			}
+			target.value = target.value.replace(/[^0-9+\-]/g, ""); // Keep only numbers, +, and -
 		});
 
 		input.addEventListener("change", async () => {
