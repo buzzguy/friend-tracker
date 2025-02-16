@@ -187,6 +187,7 @@ If your plugin does not need CSS, delete this file.
 	width: 100px;
 	color: var(--text-muted);
 	flex-shrink: 0;
+	text-transform: capitalize;
 }
 
 .contact-field-input {

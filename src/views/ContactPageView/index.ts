@@ -116,7 +116,7 @@ export class ContactPageView extends ItemView {
 			...standardFields.map((f) => f.toLowerCase()),
 		];
 		Object.entries(this.contactData)
-			.filter(([key]) => !excludedFields.includes(key))
+			.filter(([key]) => !excludedFields.includes(key.toLowerCase()))
 			.forEach(([key, value]) => {
 				this.contactFields.createInfoField(
 					basicInfo,
