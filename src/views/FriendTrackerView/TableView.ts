@@ -206,7 +206,7 @@ export class TableView {
 
 	// Filter function Factories
 	private searchFilter = (searchText: string) => {
-		return (contact: ContactWithCountdown) => contact.name.contains(searchText);
+		return (contact: ContactWithCountdown) => contact.name.toLowerCase().contains(searchText.toLowerCase());
 	}
 
 	private relationshipFilter = (relationship: string) => {
