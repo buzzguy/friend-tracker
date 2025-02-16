@@ -82,7 +82,7 @@ export class TableView {
 	private renderTableHeader(table: HTMLTableElement, sort: SortConfig) {
 		const headerRow = table.createEl("tr") as HTMLTableRowElement;
 		const columns: Array<{
-			key: keyof Omit<ContactWithCountdown, "file">;
+			key: keyof Omit<ContactWithCountdown, "file"> | "actions";
 			label: string;
 			sortable?: boolean;
 		}> = [
@@ -91,7 +91,12 @@ export class TableView {
 			{ key: "birthday", label: "Birthday", sortable: true },
 			{ key: "daysUntilBirthday", label: "Days left", sortable: true },
 			{ key: "relationship", label: "Type", sortable: true },
-			{ key: "name", label: "", sortable: false },
+			{
+				key: "lastInteraction",
+				label: "Last interaction",
+				sortable: true,
+			},
+			{ key: "actions", label: "", sortable: false },
 		];
 
 		columns.forEach(({ key, label, sortable }) => {
@@ -117,7 +122,11 @@ export class TableView {
 				});
 
 				button.addEventListener("click", () => {
-					this.view.handleSort(key);
+					if (key !== "actions") {
+						this.view.handleSort(
+							key as keyof Omit<ContactWithCountdown, "file">
+						);
+					}
 				});
 			} else {
 				th.setText(label);
@@ -167,6 +176,7 @@ export class TableView {
 						: "N/A",
 			});
 			row.createEl("td", { text: contact.relationship || "N/A" });
+			row.createEl("td", { text: contact.lastInteraction || "" });
 
 			// Actions cell
 			const actionsCell = row.createEl("td", {
@@ -221,19 +231,21 @@ export class TableView {
 					: bValue - aValue;
 			}
 
-			// Existing sorting logic for other columns
 			const aValue = a[sort.column];
 			const bValue = b[sort.column];
 
-			if (typeof aValue === "string" && typeof bValue === "string") {
-				return sort.direction === "asc"
-					? aValue.localeCompare(bValue)
-					: bValue.localeCompare(aValue);
-			}
+			// Handle null/empty values in sorting
+			if (!aValue && !bValue) return 0;
+			if (!aValue) return 1;
+			if (!bValue) return -1;
 
-			return sort.direction === "asc"
-				? (aValue as number) - (bValue as number)
-				: (bValue as number) - (aValue as number);
+			// Sort direction
+			const direction = sort.direction === "asc" ? 1 : -1;
+			return aValue < bValue
+				? -direction
+				: aValue > bValue
+				? direction
+				: 0;
 		});
 	}
 }
