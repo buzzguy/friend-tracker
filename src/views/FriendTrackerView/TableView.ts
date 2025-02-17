@@ -34,8 +34,13 @@ export class TableView {
 			return;
 		}
 
+		// Create scrollable container for table
+		const tableContainer = container.createEl("div", {
+			cls: "friend-tracker-table-container",
+		});
+
 		// Create table for contacts
-		const table = container.createEl("table", {
+		const table = tableContainer.createEl("table", {
 			cls: "friend-tracker-table",
 		}) as HTMLTableElement;
 

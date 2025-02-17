@@ -11,11 +11,14 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 32px;
 	padding: 12px 16px;
 	border-bottom: 2px solid var(--background-modifier-border);
-	width: 100%;
-	background: none;
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: rgba(var(--background-primary-rgb), 0.1);
+	backdrop-filter: blur(15px);
+	-webkit-backdrop-filter: blur(15px);
 }
 
 .friend-tracker-header h2 {
@@ -570,28 +573,13 @@ If your plugin does not need CSS, delete this file.
 	white-space: nowrap;
 }
 
-/* Remove all the flex-related styles */
-.friend-tracker-table tr {
-	/* Remove display: flex */
-}
-
-.friend-tracker-table th:nth-child(1),
-.friend-tracker-table td:nth-child(1),
-.friend-tracker-table th:nth-child(2),
-.friend-tracker-table td:nth-child(2),
-.friend-tracker-table th:nth-child(3),
-.friend-tracker-table td:nth-child(3),
-.friend-tracker-table th:nth-child(4),
-.friend-tracker-table td:nth-child(4),
-.friend-tracker-table th:nth-child(5),
-.friend-tracker-table td:nth-child(5),
-.friend-tracker-table th:nth-child(6),
-.friend-tracker-table td:nth-child(6) {
-	/* Remove width and flex properties */
-}
-
 .contact-age-display {
 	color: var(--text-muted);
 	font-size: 0.9em;
 	margin-top: 4px;
+}
+
+.friend-tracker-table-container {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
 }
