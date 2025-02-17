@@ -16,9 +16,10 @@ If your plugin does not need CSS, delete this file.
 	position: sticky;
 	top: 0;
 	z-index: 10;
-	background: rgba(var(--background-primary-rgb), 0.1);
-	backdrop-filter: blur(15px);
-	-webkit-backdrop-filter: blur(15px);
+	background: rgba(var(--background-primary-rgb), 0.8);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	flex-shrink: 0;
 }
 
 .friend-tracker-header h2 {
@@ -543,17 +544,18 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	height: 100%;
+	height: 100vh;
+	height: -webkit-fill-available;
+	min-height: -webkit-fill-available;
 }
 
-/* Container for the table - make it scrollable */
-.friend-tracker-view > div:not(.friend-tracker-header) {
-	padding: 0 16px;
-	width: 100%;
-	box-sizing: border-box;
-	overflow-x: auto; /* Enable horizontal scrolling */
+.friend-tracker-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
+	min-height: 0;
 	-webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-	background: none;
 }
 
 /* Table styles */
@@ -580,6 +582,8 @@ If your plugin does not need CSS, delete this file.
 }
 
 .friend-tracker-table-container {
-	overflow-x: auto;
+	flex: 1;
+	padding: 0 16px;
+	min-width: 100%;
 	-webkit-overflow-scrolling: touch;
 }

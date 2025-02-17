@@ -24,8 +24,12 @@ export class TableView {
 			this.view.openAddContactModal()
 		);
 
+		const content = container.createEl("div", {
+			cls: "friend-tracker-content",
+		});
+
 		if (contacts.length === 0) {
-			const emptyState = container.createEl("div", {
+			const emptyState = content.createEl("div", {
 				cls: "friend-tracker-empty-state",
 			});
 			emptyState.createEl("p", {
@@ -35,7 +39,7 @@ export class TableView {
 		}
 
 		// Create scrollable container for table
-		const tableContainer = container.createEl("div", {
+		const tableContainer = content.createEl("div", {
 			cls: "friend-tracker-table-container",
 		});
 

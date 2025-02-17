@@ -1,4 +1,4 @@
-import { Notice, TFile } from "obsidian";
+import { Notice, TFile, parseYaml } from "obsidian";
 import type FriendTracker from "@/main";
 import type { ContactWithCountdown } from "@/types";
 
@@ -23,27 +23,39 @@ export class ContactOperations {
 		for (const file of files) {
 			if (!(file instanceof TFile)) continue;
 
-			const metadata =
-				this.plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+			try {
+				// Read the file content directly instead of relying on metadata cache
+				const content = await vault.read(file);
+				const yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
-			if (metadata) {
-				const lastInteraction =
-					metadata.interactions?.length > 0
-						? this.formatDaysAgo(metadata.interactions[0].date)
-						: null;
+				if (yamlMatch) {
+					const metadata = parseYaml(yamlMatch[1]);
 
-				contacts.push({
-					name: metadata.name || "Unknown",
-					birthday: metadata.birthday || "",
-					formattedBirthday: this.formatBirthday(metadata.birthday),
-					relationship: metadata.relationship || "",
-					age: this.calculateAge(metadata.birthday),
-					daysUntilBirthday: this.calculateDaysUntilBirthday(
-						metadata.birthday
-					),
-					lastInteraction,
-					file,
-				});
+					const lastInteraction =
+						metadata.interactions?.length > 0
+							? this.formatDaysAgo(metadata.interactions[0].date)
+							: null;
+
+					contacts.push({
+						name: metadata.name || "Unknown",
+						birthday: metadata.birthday || "",
+						formattedBirthday: this.formatBirthday(
+							metadata.birthday
+						),
+						relationship: metadata.relationship || "",
+						age: this.calculateAge(metadata.birthday),
+						daysUntilBirthday: this.calculateDaysUntilBirthday(
+							metadata.birthday
+						),
+						lastInteraction,
+						file,
+					});
+				}
+			} catch (error) {
+				console.error(
+					`Error reading contact file ${file.path}:`,
+					error
+				);
 			}
 		}
 

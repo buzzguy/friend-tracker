@@ -1,4 +1,5 @@
 import type { ContactPageView } from "@/views/ContactPageView";
+import { STANDARD_FIELDS, SPECIAL_INPUT_FIELDS } from "@/constants";
 
 export class ContactFields {
 	constructor(private view: ContactPageView) {}
@@ -7,9 +8,9 @@ export class ContactFields {
 		const field = container.createEl("div", { cls: "contact-field" });
 		field.createEl("label", { text: label });
 
-		if (label === "Birthday") {
+		if (label.toLowerCase() === STANDARD_FIELDS.BIRTHDAY) {
 			this.createBirthdayField(field, value);
-		} else if (label === "Phone") {
+		} else if (label.toLowerCase() === STANDARD_FIELDS.PHONE) {
 			this.createPhoneField(field, value);
 		} else {
 			this.createTextField(field, label, value);
@@ -23,15 +24,13 @@ export class ContactFields {
 				type: "date",
 				value: value || "",
 				placeholder: "YYYY-MM-DD",
+				pattern: "\\d{4}-\\d{2}-\\d{2}",
 			},
 		});
 
 		input.addEventListener("change", async () => {
 			if (!this.view.file) return;
-			const date = input.valueAsDate;
-			const formattedDate = date
-				? date.toISOString().split("T")[0]
-				: input.value;
+			const formattedDate = input.value;
 			await this.view.updateContactData("birthday", formattedDate);
 		});
 	}
