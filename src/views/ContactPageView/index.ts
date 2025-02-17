@@ -1,4 +1,11 @@
-import { ItemView, WorkspaceLeaf, Notice, TFile, setIcon } from "obsidian";
+import {
+	ItemView,
+	WorkspaceLeaf,
+	Notice,
+	TFile,
+	setIcon,
+	parseYaml,
+} from "obsidian";
 import type FriendTracker from "@/main";
 import { ContactFields } from "@/components/ContactFields";
 import { InteractionView } from "@/components/InteractionView";
@@ -7,6 +14,7 @@ import { AddFieldModal } from "@/modals/AddFieldModal";
 import { InteractionModal } from "@/modals/InteractionModal";
 import { VIEW_TYPE_FRIEND_TRACKER } from "@/views/FriendTrackerView";
 import { FriendTrackerView } from "@/views/FriendTrackerView";
+import { STANDARD_FIELDS, SYSTEM_FIELDS } from "@/constants";
 
 export const VIEW_TYPE_CONTACT_PAGE = "contact-page-view";
 
@@ -52,8 +60,17 @@ export class ContactPageView extends ItemView {
 	async setFile(file: TFile) {
 		this._file = file;
 		if (this._file) {
-			this.contactData =
-				this.app.metadataCache.getFileCache(file)?.frontmatter || {};
+			try {
+				const content = await this.app.vault.read(file);
+				const yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
+				this.contactData = yamlMatch ? parseYaml(yamlMatch[1]) : {};
+			} catch (error) {
+				console.error(
+					`Error reading contact file ${file.path}:`,
+					error
+				);
+				this.contactData = {};
+			}
 			this.render();
 		}
 	}
@@ -91,28 +108,20 @@ export class ContactPageView extends ItemView {
 		});
 
 		// Standard fields
-		const standardFields = [
-			"Birthday",
-			"Email",
-			"Phone",
-			"Address",
-			"Relationship",
-		];
+		const standardFields = Object.values(STANDARD_FIELDS).filter(
+			(field) => !SYSTEM_FIELDS.includes(field)
+		);
 		standardFields.forEach((field) => {
 			this.contactFields.createInfoField(
 				basicInfo,
 				field,
-				this.contactData[field.toLowerCase()]
+				this.contactData[field]
 			);
 		});
 
 		// Custom fields
 		const excludedFields = [
-			"name",
-			"interactions",
-			"created",
-			"updated",
-			"notes",
+			...SYSTEM_FIELDS,
 			...standardFields.map((f) => f.toLowerCase()),
 		];
 		Object.entries(this.contactData)
