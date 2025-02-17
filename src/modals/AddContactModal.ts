@@ -1,10 +1,11 @@
 import { App, Modal, Notice } from "obsidian";
 import type FriendTracker from "@/main";
 import { stringifyYaml } from "obsidian";
-import {FriendTrackerView} from "@/views/FriendTrackerView";
+import { VIEW_TYPE_FRIEND_TRACKER } from "@/views/FriendTrackerView";
+import { FriendTrackerView } from "@/views/FriendTrackerView";
 
 export class AddContactModal extends Modal {
-	constructor(app: App, private plugin: FriendTracker, private view: FriendTrackerView) {
+	constructor(app: App, private plugin: FriendTracker) {
 		super(app);
 	}
 
@@ -41,6 +42,7 @@ export class AddContactModal extends Modal {
 				type: "date",
 				name: "birthday",
 				placeholder: "YYYY-MM-DD",
+				pattern: "\\d{4}-\\d{2}-\\d{2}",
 			},
 			cls: "friend-tracker-modal-input",
 		});
@@ -104,7 +106,7 @@ export class AddContactModal extends Modal {
 			if (emailInput.value) data.email = emailInput.value;
 			if (phoneInput.value) data.phone = phoneInput.value;
 			if (relationshipInput.value)
-				data.relationship = relationshipInput.value;
+				data.relationship = relationshipInput.value.toLowerCase();
 
 			if (data.name) {
 				this.onSubmit(data);
@@ -127,17 +129,29 @@ export class AddContactModal extends Modal {
 		const yaml = stringifyYaml(data);
 		const fileContent = `---\n${yaml}\n---\n`;
 
-		this.app.vault
-			.create(filePath, fileContent)
-			.then(() => {
-				new Notice(`Created contact: ${data.name}`);
+		try {
+			await this.app.vault.create(filePath, fileContent);
 
-				// Wait for the system to recognize the file
-				setTimeout(() => this.view.refresh(), 100);
-			})
-			.catch((error) => {
-				new Notice(`Error creating contact: ${error}`);
-			});
+			// Wait a moment for the file to be indexed
+			await new Promise((resolve) => setTimeout(resolve, 300));
+
+			// Refresh the Friend Tracker view
+			const friendTrackerLeaves = this.app.workspace.getLeavesOfType(
+				VIEW_TYPE_FRIEND_TRACKER
+			);
+
+			for (const leaf of friendTrackerLeaves) {
+				const view = leaf.view;
+				if (view instanceof FriendTrackerView) {
+					await view.refresh();
+					break;
+				}
+			}
+
+			new Notice(`Created contact: ${data.name}`);
+		} catch (error) {
+			new Notice(`Error creating contact: ${error}`);
+		}
 	}
 
 	onClose() {

@@ -15,8 +15,13 @@ If your plugin does not need CSS, delete this file.
 	margin-bottom: 32px;
 	padding: 12px 16px;
 	border-bottom: 2px solid var(--background-modifier-border);
-	width: 100%;
-	background: none;
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: rgba(var(--background-primary-rgb), 0.8);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	flex-shrink: 0;
 }
 
 .friend-tracker-header h2 {
@@ -203,6 +208,7 @@ If your plugin does not need CSS, delete this file.
 	width: 100px;
 	color: var(--text-muted);
 	flex-shrink: 0;
+	text-transform: capitalize;
 }
 
 .contact-field-input {
@@ -555,17 +561,18 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	height: 100%;
+	height: 100vh;
+	height: -webkit-fill-available;
+	min-height: -webkit-fill-available;
 }
 
-/* Container for the table - make it scrollable */
-.friend-tracker-view > div:not(.friend-tracker-header) {
-	padding: 0 16px;
-	width: 100%;
-	box-sizing: border-box;
-	overflow-x: auto; /* Enable horizontal scrolling */
+.friend-tracker-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
+	min-height: 0;
 	-webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-	background: none;
 }
 
 /* Table styles */
@@ -585,28 +592,15 @@ If your plugin does not need CSS, delete this file.
 	white-space: nowrap;
 }
 
-/* Remove all the flex-related styles */
-.friend-tracker-table tr {
-	/* Remove display: flex */
-}
-
-.friend-tracker-table th:nth-child(1),
-.friend-tracker-table td:nth-child(1),
-.friend-tracker-table th:nth-child(2),
-.friend-tracker-table td:nth-child(2),
-.friend-tracker-table th:nth-child(3),
-.friend-tracker-table td:nth-child(3),
-.friend-tracker-table th:nth-child(4),
-.friend-tracker-table td:nth-child(4),
-.friend-tracker-table th:nth-child(5),
-.friend-tracker-table td:nth-child(5),
-.friend-tracker-table th:nth-child(6),
-.friend-tracker-table td:nth-child(6) {
-	/* Remove width and flex properties */
-}
-
 .contact-age-display {
 	color: var(--text-muted);
 	font-size: 0.9em;
 	margin-top: 4px;
+}
+
+.friend-tracker-table-container {
+	flex: 1;
+	padding: 0 16px;
+	min-width: 100%;
+	-webkit-overflow-scrolling: touch;
 }
