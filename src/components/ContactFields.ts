@@ -72,7 +72,7 @@ export class ContactFields {
 		});
 
 		input.addEventListener("change", async () => {
-			await this.view.updateContactData(label, input.value);
+			await this.view.updateContactData(label.toLowerCase(), input.value);
 		});
 	}
 }
