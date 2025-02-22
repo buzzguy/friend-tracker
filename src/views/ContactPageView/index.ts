@@ -5,6 +5,7 @@ import {
 	TFile,
 	setIcon,
 	parseYaml,
+	MarkdownRenderer,
 } from "obsidian";
 import type FriendTracker from "@/main";
 import { ContactFields } from "@/components/ContactFields";
@@ -148,6 +149,9 @@ export class ContactPageView extends ItemView {
 
 		// Interactions Section
 		this.renderInteractionsSection(container);
+
+		// Extras Section
+		this.renderExtrasSection(container);
 	}
 
 	private renderNameSection(container: HTMLElement) {
@@ -317,6 +321,59 @@ export class ContactPageView extends ItemView {
 				interactions,
 				this.contactData.interactions
 			);
+		}
+	}
+
+	private async renderExtrasSection(container: HTMLElement) {
+		const extrasSection = container.createEl("div", {
+			cls: "contact-extras-section",
+		});
+	
+		if (!this._file) return;
+	
+		try {
+			const content = await this.app.vault.read(this._file);
+			const extrasContent = content.split(/^---\n([\s\S]*?)\n---/).pop() || "";
+			
+			if (extrasContent.trim()) {
+				extrasSection.createEl("h2", { text: "Additional notes" });
+				const contentDiv = extrasSection.createEl("div", {
+					cls: "contact-extras-content"
+				});
+	
+				await MarkdownRenderer.renderMarkdown(
+					extrasContent,
+					contentDiv,
+					this._file.path,
+					this
+				);
+	
+				// Add click handlers for internal links
+				contentDiv.addEventListener("click", (event) => {
+					const target = event.target as HTMLElement;
+					if (target.tagName === "A") {
+						const anchor = target as HTMLAnchorElement;
+						const href = anchor.getAttribute("href");
+						
+						if (href?.startsWith("#")) {
+							// Handle internal anchor links
+							event.preventDefault();
+							const targetEl = contentDiv.querySelector(href);
+							targetEl?.scrollIntoView();
+						} else if (!href?.startsWith("http")) {
+							// Handle internal Obsidian links
+							event.preventDefault();
+							this.app.workspace.openLinkText(
+								href || "",
+								this._file?.path || "",
+								event.ctrlKey || event.metaKey
+							);
+						}
+					}
+				});
+			}
+		} catch (error) {
+			console.error(`Error reading extras from file ${this._file.path}:`, error);
 		}
 	}
 
