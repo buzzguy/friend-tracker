@@ -23,9 +23,26 @@ export class ContactPageView extends ItemView {
 	private contactData: any = {};
 	private contactFields: ContactFields;
 	private interactionView: InteractionView;
+	public plugin: FriendTracker;
 
-	constructor(leaf: WorkspaceLeaf, private plugin: FriendTracker) {
+	public getRelationshipTypes(): string[] {
+		return this.plugin.settings.relationshipTypes;
+	}
+
+	public async addRelationshipType(
+		type: string,
+		existingTypes?: string[]
+	): Promise<void> {
+		this.plugin.settings.relationshipTypes = [
+			...(existingTypes || this.plugin.settings.relationshipTypes),
+			type,
+		];
+		await this.plugin.saveSettings();
+	}
+
+	constructor(leaf: WorkspaceLeaf, private _plugin: FriendTracker) {
 		super(leaf);
+		this.plugin = _plugin;
 		this.contactFields = new ContactFields(this);
 		this.interactionView = new InteractionView(this);
 	}

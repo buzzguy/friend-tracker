@@ -4,6 +4,7 @@ export interface FriendTrackerSettings {
 	contactsFolder: string;
 	defaultSortColumn: keyof Omit<ContactWithCountdown, "file">;
 	defaultSortDirection: "asc" | "desc";
+	relationshipTypes: string[];
 }
 
 export interface Contact {
@@ -34,4 +35,5 @@ export const DEFAULT_SETTINGS: FriendTrackerSettings = {
 	contactsFolder: "FriendTracker",
 	defaultSortColumn: "daysUntilBirthday",
 	defaultSortDirection: "asc",
+	relationshipTypes: ["family", "friend", "colleague", "pet"],
 };
