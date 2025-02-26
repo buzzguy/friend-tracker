@@ -3,6 +3,7 @@ import type FriendTracker from "@/main";
 import { stringifyYaml } from "obsidian";
 import { VIEW_TYPE_FRIEND_TRACKER } from "@/views/FriendTrackerView";
 import { FriendTrackerView } from "@/views/FriendTrackerView";
+import { createRelationshipInput } from "@/components/ContactFields";
 
 export class AddContactModal extends Modal {
 	constructor(app: App, private plugin: FriendTracker) {
@@ -80,14 +81,10 @@ export class AddContactModal extends Modal {
 			cls: "friend-tracker-modal-field",
 		});
 		relationshipField.createEl("label", { text: "Relationship" });
-		const relationshipInput = relationshipField.createEl("input", {
-			attr: {
-				type: "text",
-				name: "relationship",
-				placeholder: "Friend, Family, Colleague, etc.",
-			},
-			cls: "friend-tracker-modal-input",
-		});
+		const relationshipInput = createRelationshipInput(
+			relationshipField,
+			this.plugin
+		);
 
 		// Submit button
 		form.createEl("button", {
@@ -105,8 +102,27 @@ export class AddContactModal extends Modal {
 			if (birthdayInput.value) data.birthday = birthdayInput.value;
 			if (emailInput.value) data.email = emailInput.value;
 			if (phoneInput.value) data.phone = phoneInput.value;
-			if (relationshipInput.value)
+			if (relationshipInput.value) {
+				const relationship = relationshipInput.value.toLowerCase();
 				data.relationship = relationshipInput.value.toLowerCase();
+				// Add new relationship type to settings if it doesn't exist
+				if (
+					!this.plugin.settings.relationshipTypes.includes(
+						relationship
+					)
+				) {
+					// Remove any duplicates (case-insensitive) before adding
+					this.plugin.settings.relationshipTypes = [
+						...new Set(
+							this.plugin.settings.relationshipTypes.filter(
+								(type) => type.toLowerCase() !== relationship
+							)
+						),
+						relationship,
+					];
+					this.plugin.saveSettings();
+				}
+			}
 
 			if (data.name) {
 				this.onSubmit(data);

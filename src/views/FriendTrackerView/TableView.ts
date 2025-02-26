@@ -141,7 +141,10 @@ export class TableView {
 						? `${contact.daysUntilBirthday} days`
 						: "N/A",
 			});
-			row.createEl("td", { text: contact.relationship || "N/A" });
+			row.createEl("td", {
+				text: contact.relationship || "N/A",
+				cls: "friend-tracker-relationship-cell",
+			});
 			row.createEl("td", { text: contact.lastInteraction || "" });
 
 			// Actions cell
@@ -188,6 +191,22 @@ export class TableView {
 
 			// Sort direction
 			const direction = sort.direction === "asc" ? 1 : -1;
+
+			// Handle different types of values
+			if (sort.column === "relationship" || sort.column === "name") {
+				// Case-insensitive string comparison for text columns
+				const aStr = String(aValue).toLowerCase();
+				const bStr = String(bValue).toLowerCase();
+				return aStr < bStr ? -direction : aStr > bStr ? direction : 0;
+			} else if (
+				typeof aValue === "number" &&
+				typeof bValue === "number"
+			) {
+				// Numeric comparison
+				return (aValue - bValue) * direction;
+			}
+
+			// Default string comparison
 			return aValue < bValue
 				? -direction
 				: aValue > bValue
