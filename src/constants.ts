@@ -12,6 +12,7 @@ export const STANDARD_FIELDS = {
 	CREATED: "created",
 	UPDATED: "updated",
 	NOTES: "notes",
+	EXTRAS: "extras",
 } as const;
 
 // System fields that shouldn't be shown as custom fields
@@ -21,6 +22,7 @@ export const SYSTEM_FIELDS: StandardFieldValue[] = [
 	STANDARD_FIELDS.CREATED,
 	STANDARD_FIELDS.UPDATED,
 	STANDARD_FIELDS.NOTES,
+	STANDARD_FIELDS.EXTRAS,
 ];
 
 // Fields that have special input handling
