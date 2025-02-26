@@ -122,13 +122,11 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 				tempInput.focus();
 
 				const handleAdd = async () => {
-					// Get the full value and ensure it exists
 					const fullValue = tempInput.value || "";
 					const value = fullValue.trim();
 
 					if (value) {
 						const newType = value.toLowerCase();
-
 						if (
 							!this.plugin.settings.relationshipTypes.includes(
 								newType
@@ -140,7 +138,8 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 							await this.plugin.saveSettings();
 						}
 					}
-					this.display();
+					// Schedule the display update after the current event
+					setTimeout(() => this.display(), 0);
 				};
 
 				tempInput.addEventListener("keydown", async (e) => {
@@ -195,7 +194,6 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 											type
 										);
 									if (
-										// Always update to ensure consistent case
 										value.toLowerCase() !== type ||
 										value !== value.toLowerCase()
 									) {
@@ -213,7 +211,8 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 											index
 										] = newType;
 										await this.plugin.saveSettings();
-										this.display();
+										// Schedule the display update after the current event
+										setTimeout(() => this.display(), 0);
 									}
 								}
 							);
