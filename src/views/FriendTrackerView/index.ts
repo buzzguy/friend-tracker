@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, EventRef, TFile, Platform } from "obsidian";
+import {ItemView, WorkspaceLeaf, EventRef, TFile, Platform, Notice} from "obsidian";
 import type FriendTracker from "@/main";
 import { TableView } from "./TableView";
 import { ContactOperations } from "@/services/ContactOperations";
@@ -10,6 +10,9 @@ import { DeleteContactModal } from "@/modals/DeleteContactModal";
 export const VIEW_TYPE_FRIEND_TRACKER = "friend-tracker-view";
 
 export class FriendTrackerView extends ItemView {
+	searchText = "";
+	searchBarEl: HTMLInputElement;
+	relationshipFilter = "index";
 	currentSort: SortConfig;
 	private tableView: TableView;
 	private contactOps: ContactOperations;
@@ -29,8 +32,25 @@ export class FriendTrackerView extends ItemView {
 	// ... rest of the implementation from earlier
 
 	public async openAddContactModal() {
-		const modal = new AddContactModal(this.app, this.plugin);
+		const modal = new AddContactModal(this.app, this.plugin, this);
 		modal.open();
+	}
+	public handleSearch(searchInput: string) {
+		this.searchText = searchInput;
+		this.refresh()
+			.then(() => {
+				this.searchBarEl.focus()
+
+				// Set Cursor at the End of the Text
+				const val = this.searchBarEl.value; //store the value of the element
+				this.searchBarEl.value = ''; //clear the value of the element
+				this.searchBarEl.value = val; //set that value back.
+			});
+	}
+
+	public handleFilterRelationship(relationshipFilter: string) {
+		this.relationshipFilter = relationshipFilter;
+		this.refresh();
 	}
 
 	public handleSort(column: keyof Omit<ContactWithCountdown, "file">) {
@@ -113,5 +133,9 @@ export class FriendTrackerView extends ItemView {
 	private isContactFile(file: TFile): boolean {
 		const contactFolder = this.plugin.settings.contactsFolder;
 		return file.path.startsWith(contactFolder + "/");
+	}
+
+	public async getContactTypesList() {
+		return this.contactOps.getContactTypes();
 	}
 }

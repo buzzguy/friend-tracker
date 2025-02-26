@@ -11,6 +11,8 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	gap: 1rem;
+	margin-bottom: 32px;
 	padding: 12px 16px;
 	border-bottom: 2px solid var(--background-modifier-border);
 	position: sticky;
@@ -29,6 +31,21 @@ If your plugin does not need CSS, delete this file.
 	letter-spacing: 0.08em;
 	color: var(--text-muted);
 	margin: 0;
+}
+
+.friend-tracker-header select {
+	padding: var(--size-4-1) var(--size-4-2);
+	box-shadow: none !important;
+	border: 1px solid var(--background-modifier-border);
+	background-color: var(--background-modifier-form-field);
+}
+
+.friend-tracker-header select:hover {
+	border-color: var(--background-modifier-border-hover);
+}
+
+.friend-tracker-header select:focus {
+	outline: none;
 }
 
 .friend-tracker-add-button {

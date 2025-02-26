@@ -16,6 +16,42 @@ export class TableView {
 		});
 		headerContainer.createEl("h2", { text: "Friend tracker" });
 
+		// Create Search Bar
+		const searchBar = headerContainer.createEl("input", {
+			text: "Search",
+			cls: "contact-field-input",
+			attr: {
+				type: "text",
+				placeholder: "Search",
+				value: this.view.searchText
+			}
+		});
+
+		this.view.searchBarEl = searchBar;
+
+		searchBar.addEventListener("input", () => {
+			this.view.handleSearch(searchBar.value || "");
+		});
+
+		// Create Relationship Dropdown
+		const relationshipDropDown = headerContainer.createEl("select");
+
+		const contactTypes = (await this.view.getContactTypesList()) ?? []
+		const contactItems = contactTypes.map(type => ({text: type, value: type}))
+
+		contactItems.unshift({text: "No Relationship Filter", value: "index"})
+
+		contactItems.forEach(({ text, value }) => {
+			relationshipDropDown.appendChild(new Option(text, value));
+		});
+
+		relationshipDropDown.value = this.view.relationshipFilter;
+
+		relationshipDropDown.addEventListener("change", () => {
+			this.view.handleFilterRelationship(relationshipDropDown.value);
+		});
+
+		// Create Add Contact Button
 		const addButton = headerContainer.createEl("button", {
 			text: "Add contact",
 			cls: "friend-tracker-add-button",
@@ -117,7 +153,14 @@ export class TableView {
 			this.view.currentSort
 		);
 
-		sortedContacts.forEach((contact) => {
+		// Filter
+		const filteredContacts = this.filterContacts(
+			sortedContacts,
+			this.view.searchText,
+			this.view.relationshipFilter
+		);
+
+		filteredContacts.forEach((contact) => {
 			const row = table.createEl("tr") as HTMLTableRowElement;
 
 			// Create name cell with click handler
@@ -164,6 +207,25 @@ export class TableView {
 				this.view.openDeleteModal(contact.file);
 			});
 		});
+	}
+
+	private filterContacts(contacts: ContactWithCountdown[], searchText: string, relationshipFilter: string) {
+		// Apply Filters
+		return contacts
+			.filter(this.searchFilter(searchText))
+			.filter(this.relationshipFilter(relationshipFilter));
+	}
+
+	// Filter function Factories
+	private searchFilter = (searchText: string) => {
+		return (contact: ContactWithCountdown) => contact.name.toLowerCase().contains(searchText.toLowerCase());
+	}
+
+	private relationshipFilter = (relationship: string) => {
+		return (contact: ContactWithCountdown) => {
+			if(relationship === "index") return true
+			return contact.relationship === relationship
+		};
 	}
 
 	private sortContacts(contacts: ContactWithCountdown[], sort: SortConfig) {
