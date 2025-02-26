@@ -106,7 +106,7 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 			cls: "friend-tracker-relationship-header",
 		});
 
-		headerContainer.createEl("h3", { text: "Relationship Types" });
+		headerContainer.createEl("h3", { text: "Relationship types" });
 
 		new Setting(headerContainer).addButton((button) =>
 			button.setButtonText("Add relationship type").onClick(async () => {
