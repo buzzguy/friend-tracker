@@ -123,10 +123,10 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 					// Get the full value and ensure it exists
 					const fullValue = tempInput.value || "";
 					const value = fullValue.trim();
-					console.log("Adding relationship type:", value); // Debug log
+
 					if (value) {
 						const newType = value.toLowerCase();
-						console.log("Normalized type:", newType); // Debug log
+
 						if (
 							!this.plugin.settings.relationshipTypes.includes(
 								newType
@@ -136,10 +136,6 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 								newType
 							);
 							await this.plugin.saveSettings();
-							console.log(
-								"Updated types:",
-								this.plugin.settings.relationshipTypes
-							); // Debug log
 						}
 					}
 					this.display();
