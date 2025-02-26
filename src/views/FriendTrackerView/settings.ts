@@ -4,6 +4,7 @@ import {
 	Setting,
 	AbstractInputSuggest,
 	TFolder,
+	normalizePath,
 } from "obsidian";
 import type FriendTracker from "@/main";
 import type { ContactWithCountdown } from "@/types";
@@ -67,7 +68,8 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 					.setPlaceholder("Enter folder name")
 					.setValue(this.plugin.settings.contactsFolder)
 					.onChange(async (value) => {
-						this.plugin.settings.contactsFolder = value;
+						this.plugin.settings.contactsFolder =
+							normalizePath(value);
 						await this.plugin.saveSettings();
 					});
 			});
@@ -107,13 +109,13 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 		headerContainer.createEl("h3", { text: "Relationship Types" });
 
 		new Setting(headerContainer).addButton((button) =>
-			button.setButtonText("Add Relationship Type").onClick(async () => {
+			button.setButtonText("Add relationship type").onClick(async () => {
 				// Create a temporary input field
 				const tempInput = document.createElement("input");
 				tempInput.type = "text";
-				tempInput.placeholder = "Enter type name";
-				tempInput.className = "friend-tracker-modal-input";
-				tempInput.style.width = "200px";
+				tempInput.placeholder = "Enter relationship type";
+				tempInput.className =
+					"friend-tracker-modal-input relationship-type-input";
 
 				// Replace button with input temporarily
 				button.buttonEl.replaceWith(tempInput);

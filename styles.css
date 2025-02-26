@@ -515,7 +515,9 @@ If your plugin does not need CSS, delete this file.
 	border-radius: 4px;
 	color: var(--text-normal);
 }
-
+.friend-tracker-modal-input.relationship-type-input {
+	width: 200px;
+}
 .friend-tracker-modal-input:focus {
 	border-color: var(--interactive-accent);
 	outline: none;
