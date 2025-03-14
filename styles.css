@@ -574,7 +574,9 @@ If your plugin does not need CSS, delete this file.
 	border-radius: 4px;
 	color: var(--text-normal);
 }
-
+.friend-tracker-modal-input.relationship-type-input {
+	width: 200px;
+}
 .friend-tracker-modal-input:focus {
 	border-color: var(--interactive-accent);
 	outline: none;
@@ -645,4 +647,65 @@ If your plugin does not need CSS, delete this file.
 	padding: 0 16px;
 	min-width: 100%;
 	-webkit-overflow-scrolling: touch;
+}
+
+/* Style for relationship type settings */
+.friend-tracker-relationship-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.friend-tracker-relationship-header h3 {
+	margin: 0;
+}
+
+/* Remove default Setting styles in header */
+.friend-tracker-relationship-header .setting-item {
+	border: none;
+	padding: 0;
+}
+
+.friend-tracker-relationship-header .setting-item-control {
+	padding: 0;
+}
+
+.friend-tracker-relationship-types {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 12px;
+}
+
+.friend-tracker-relationship-types .setting-item {
+	border: none;
+	padding: 8px;
+	margin: 0;
+	background: var(--background-modifier-form-field);
+	border-radius: 4px;
+}
+
+.friend-tracker-relationship-types .setting-item-info {
+	display: none;
+}
+
+.friend-tracker-relationship-types .setting-item-control {
+	flex: 1;
+	justify-content: space-between;
+	padding: 0;
+}
+
+.friend-tracker-relationship-types .setting-item-control input {
+	text-align: left;
+	text-transform: capitalize;
+}
+
+/* Capitalize relationship values in table */
+.friend-tracker-relationship-cell {
+	text-transform: capitalize;
+}
+
+/* Capitalize relationship input field */
+.contact-field input[list="relationship-types"] {
+	text-transform: capitalize;
 }

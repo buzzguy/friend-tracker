@@ -4,9 +4,9 @@ import {
 	Setting,
 	AbstractInputSuggest,
 	TFolder,
+	normalizePath,
 } from "obsidian";
 import type FriendTracker from "@/main";
-import { normalizePath } from "obsidian";
 import type { ContactWithCountdown } from "@/types";
 
 class FolderSuggest extends AbstractInputSuggest<string> {
@@ -61,7 +61,7 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Contacts folder")
-			.setDesc("Folder to store contact files")
+			.setDesc("Folder where contact files will be stored")
 			.addText((text) => {
 				new FolderSuggest(this.app, text.inputEl);
 				return text
@@ -101,5 +101,140 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					});
 			});
+
+		const headerContainer = containerEl.createEl("div", {
+			cls: "friend-tracker-relationship-header",
+		});
+
+		headerContainer.createEl("h3", { text: "Relationship types" });
+
+		new Setting(headerContainer).addButton((button) =>
+			button.setButtonText("Add relationship type").onClick(async () => {
+				// Create a temporary input field
+				const tempInput = document.createElement("input");
+				tempInput.type = "text";
+				tempInput.placeholder = "Enter relationship type";
+				tempInput.className =
+					"friend-tracker-modal-input relationship-type-input";
+
+				// Replace button with input temporarily
+				button.buttonEl.replaceWith(tempInput);
+				tempInput.focus();
+
+				const handleAdd = async () => {
+					const fullValue = tempInput.value || "";
+					const value = fullValue.trim();
+
+					if (value) {
+						const newType = value.toLowerCase();
+						if (
+							!this.plugin.settings.relationshipTypes.includes(
+								newType
+							)
+						) {
+							this.plugin.settings.relationshipTypes.push(
+								newType
+							);
+							await this.plugin.saveSettings();
+						}
+					}
+					// Schedule the display update after the current event
+					setTimeout(() => this.display(), 0);
+				};
+
+				tempInput.addEventListener("keydown", async (e) => {
+					if (e.key === "Enter") {
+						e.preventDefault();
+						await handleAdd();
+					} else if (e.key === "Escape") {
+						this.display();
+					}
+				});
+
+				// Only handle blur if there's a value
+				tempInput.addEventListener("blur", async () => {
+					if (tempInput.value?.trim()) {
+						await handleAdd();
+					} else {
+						this.display();
+					}
+				});
+			})
+		);
+
+		const relationshipContainer = containerEl.createEl("div", {
+			cls: "friend-tracker-relationship-types",
+		});
+
+		this.plugin.settings.relationshipTypes.forEach((type) => {
+			new Setting(relationshipContainer)
+				.addText((text) =>
+					text
+						.setValue(type)
+						.setPlaceholder("Type name")
+						.then((textComponent) => {
+							// Save on Enter
+							textComponent.inputEl.addEventListener(
+								"keypress",
+								async (e) => {
+									if (e.key === "Enter") {
+										e.preventDefault();
+										textComponent.inputEl.blur();
+									}
+								}
+							);
+
+							// Save on blur
+							textComponent.inputEl.addEventListener(
+								"blur",
+								async () => {
+									const value = textComponent.inputEl.value;
+									const index =
+										this.plugin.settings.relationshipTypes.indexOf(
+											type
+										);
+									if (
+										value.toLowerCase() !== type ||
+										value !== value.toLowerCase()
+									) {
+										const newType = value.toLowerCase();
+										this.plugin.settings.relationshipTypes =
+											[
+												...this.plugin.settings.relationshipTypes.filter(
+													(t, i) =>
+														i === index ||
+														t.toLowerCase() !==
+															newType
+												),
+											];
+										this.plugin.settings.relationshipTypes[
+											index
+										] = newType;
+										await this.plugin.saveSettings();
+										// Schedule the display update after the current event
+										setTimeout(() => this.display(), 0);
+									}
+								}
+							);
+						})
+				)
+				.addExtraButton((button) => {
+					button
+						.setIcon("trash")
+						.setTooltip("Delete relationship type")
+						.onClick(async () => {
+							const index =
+								this.plugin.settings.relationshipTypes.indexOf(
+									type
+								);
+							this.plugin.settings.relationshipTypes.splice(
+								index,
+								1
+							);
+							await this.plugin.saveSettings();
+							this.display();
+						});
+				});
+		});
 	}
 }
