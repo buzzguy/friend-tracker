@@ -315,7 +315,6 @@ If your plugin does not need CSS, delete this file.
 	opacity: 1;
 }
 
-
 /* Buttons */
 .contact-add-field-button,
 .contact-add-interaction-button {
@@ -447,12 +446,15 @@ If your plugin does not need CSS, delete this file.
 	align-items: center;
 	justify-content: space-between;
 	width: 100%;
+	gap: 8px;
 }
 
-.contact-name-display h1,
-.contact-name-input {
-	width: calc(100% - 40px); /* Leave space for button */
+.contact-name-display h1 {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	margin: 0;
+	line-height: 1.2;
 }
 
 .contact-name-display h1.editing {
@@ -708,4 +710,45 @@ If your plugin does not need CSS, delete this file.
 /* Capitalize relationship input field */
 .contact-field input[list="relationship-types"] {
 	text-transform: capitalize;
+}
+
+.contact-interaction-date,
+.contact-interaction-text,
+.contact-age-display,
+.contact-extras-content {
+	-webkit-user-select: text;
+	user-select: text;
+	cursor: text;
+}
+
+.contact-extras-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+.contact-extras-header h2 {
+	margin: 0;
+}
+
+.contact-extras-edit {
+	background: none;
+	border: none;
+	padding: 2px;
+	border-radius: 4px;
+	color: var(--text-muted);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 20px;
+	width: 20px;
+	margin-left: 8px;
+	transition: color 0.2s ease;
+}
+
+.contact-extras-edit:hover {
+	color: var(--text-normal);
+	background-color: var(--background-modifier-hover);
 }
