@@ -205,7 +205,7 @@ export class ContactPageView extends ItemView {
 			const ageText = this.calculateDetailedAge(
 				this.contactData.birthday
 			);
-			nameDisplay.createEl("div", {
+			nameDisplay.createEl("span", {
 				text: ageText,
 				cls: "contact-age-display",
 			});
@@ -321,7 +321,7 @@ export class ContactPageView extends ItemView {
 
 	private renderInteractionsSection(container: HTMLElement) {
 		const interactions = container.createEl("div", {
-			cls: "contact-interactions",
+			cls: "contact-interactions selectable",
 		});
 		interactions.createEl("h2", { text: "Recent interactions" });
 
@@ -345,33 +345,49 @@ export class ContactPageView extends ItemView {
 		const extrasSection = container.createEl("div", {
 			cls: "contact-extras-section",
 		});
-	
+
 		if (!this._file) return;
-	
+
+		const headerContainer = extrasSection.createEl("div", {
+			cls: "contact-extras-header",
+		});
+
+		headerContainer.createEl("h2", { text: "Additional notes" });
+
+		const editButton = headerContainer.createEl("button", {
+			cls: "contact-extras-edit",
+			attr: { "aria-label": "Edit in markdown" },
+		});
+		setIcon(editButton, "pencil");
+
+		editButton.addEventListener("click", () => {
+			this.app.workspace.openLinkText(this._file?.path || "", "", true);
+		});
+
 		try {
 			const content = await this.app.vault.read(this._file);
-			const extrasContent = content.split(/^---\n([\s\S]*?)\n---/).pop() || "";
-			
+			const extrasContent =
+				content.split(/^---\n([\s\S]*?)\n---/).pop() || "";
+
 			if (extrasContent.trim()) {
-				extrasSection.createEl("h2", { text: "Additional notes" });
 				const contentDiv = extrasSection.createEl("div", {
-					cls: "contact-extras-content"
+					cls: "contact-extras-content",
 				});
-	
+
 				await MarkdownRenderer.renderMarkdown(
 					extrasContent,
 					contentDiv,
 					this._file.path,
 					this
 				);
-	
+
 				// Add click handlers for internal links
 				contentDiv.addEventListener("click", (event) => {
 					const target = event.target as HTMLElement;
 					if (target.tagName === "A") {
 						const anchor = target as HTMLAnchorElement;
 						const href = anchor.getAttribute("href");
-						
+
 						if (href?.startsWith("#")) {
 							// Handle internal anchor links
 							event.preventDefault();
@@ -390,7 +406,10 @@ export class ContactPageView extends ItemView {
 				});
 			}
 		} catch (error) {
-			console.error(`Error reading extras from file ${this._file.path}:`, error);
+			console.error(
+				`Error reading extras from file ${this._file.path}:`,
+				error
+			);
 		}
 	}
 
