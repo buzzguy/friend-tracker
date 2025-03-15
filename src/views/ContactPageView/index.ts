@@ -321,7 +321,7 @@ export class ContactPageView extends ItemView {
 
 	private renderInteractionsSection(container: HTMLElement) {
 		const interactions = container.createEl("div", {
-			cls: "contact-interactions selectable",
+			cls: "contact-interactions",
 		});
 		interactions.createEl("h2", { text: "Recent interactions" });
 

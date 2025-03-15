@@ -446,12 +446,15 @@ If your plugin does not need CSS, delete this file.
 	align-items: center;
 	justify-content: space-between;
 	width: 100%;
+	gap: 8px;
 }
 
-.contact-name-display h1,
-.contact-name-input {
-	width: calc(100% - 40px); /* Leave space for button */
+.contact-name-display h1 {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	margin: 0;
+	line-height: 1.2;
 }
 
 .contact-name-display h1.editing {
