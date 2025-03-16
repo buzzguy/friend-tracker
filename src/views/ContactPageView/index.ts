@@ -323,9 +323,14 @@ export class ContactPageView extends ItemView {
 		const interactions = container.createEl("div", {
 			cls: "contact-interactions",
 		});
-		interactions.createEl("h2", { text: "Recent interactions" });
 
-		const addButton = interactions.createEl("button", {
+		const headerContainer = interactions.createEl("div", {
+			cls: "contact-interactions-header",
+		});
+
+		headerContainer.createEl("h2", { text: "Recent interactions" });
+
+		const addButton = headerContainer.createEl("button", {
 			text: "Add interaction",
 			cls: "contact-add-interaction-button",
 		});

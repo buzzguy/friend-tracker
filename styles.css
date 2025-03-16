@@ -239,27 +239,48 @@ If your plugin does not need CSS, delete this file.
 	border-top: 1px solid var(--background-modifier-border);
 }
 
-.contact-interactions-list {
-	margin-top: 16px;
+.contact-interactions-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.contact-interactions-header h2 {
+	margin: 0;
+}
+
+.contact-add-interaction-button {
+	padding: 6px 12px;
+	background-color: var(--background-modifier-border);
+	color: var(--text-normal);
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 0.9em;
+	transition: all 0.2s ease;
+}
+
+.contact-add-interaction-button:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
 }
 
 .contact-interaction-item {
 	display: flex;
-	align-items: flex-start;
+	flex-direction: column;
 	padding: 12px;
 	border-bottom: 1px solid var(--background-modifier-border);
-	gap: 12px;
+	position: relative;
 }
 
 .contact-interaction-date {
 	color: var(--text-muted);
-	font-size: 0.9em;
-	width: 100px;
-	flex-shrink: 0;
+	font-size: 0.85em;
+	margin-bottom: 4px;
 }
 
 .contact-interaction-text {
-	flex: 1;
 	line-height: 1.4;
 }
 
@@ -268,6 +289,9 @@ If your plugin does not need CSS, delete this file.
 	gap: 8px;
 	opacity: 0;
 	transition: opacity 0.2s ease;
+	position: absolute;
+	top: 8px;
+	right: 8px;
 }
 
 .contact-interaction-item:hover .contact-interaction-actions {
