@@ -277,6 +277,9 @@ export class ContactPageView extends ItemView {
 
 					const field = fieldsContainer.createEl("div", {
 						cls: "contact-field-view",
+						attr: {
+							"data-field": key.toLowerCase(),
+						},
 					});
 
 					field.createEl("div", {

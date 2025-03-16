@@ -833,6 +833,10 @@ If your plugin does not need CSS, delete this file.
 	-webkit-user-select: text;
 	user-select: text;
 	padding: 2px 0;
+}
+
+/* Only capitalize relationship values */
+.contact-field-view[data-field="relationship"] .contact-field-value {
 	text-transform: capitalize;
 }
 
