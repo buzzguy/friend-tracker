@@ -117,49 +117,7 @@ export class ContactPageView extends ItemView {
 		this.renderNameSection(nameContainer);
 
 		// Basic Info Section
-		const infoSection = container.createEl("div", {
-			cls: "contact-info-section",
-		});
-
-		const basicInfo = infoSection.createEl("div", {
-			cls: "contact-basic-info",
-		});
-
-		// Standard fields
-		const standardFields = Object.values(STANDARD_FIELDS).filter(
-			(field) => !SYSTEM_FIELDS.includes(field)
-		);
-		standardFields.forEach((field) => {
-			this.contactFields.createInfoField(
-				basicInfo,
-				field,
-				this.contactData[field]
-			);
-		});
-
-		// Custom fields
-		const excludedFields = [
-			...SYSTEM_FIELDS,
-			...standardFields.map((f) => f.toLowerCase()),
-		];
-		Object.entries(this.contactData)
-			.filter(([key]) => !excludedFields.includes(key.toLowerCase()))
-			.forEach(([key, value]) => {
-				this.contactFields.createInfoField(
-					basicInfo,
-					key,
-					value as string
-				);
-			});
-
-		// Add custom field button
-		const addFieldButton = basicInfo.createEl("button", {
-			text: "Add custom field",
-			cls: "contact-add-field-button",
-		});
-		addFieldButton.addEventListener("click", () => {
-			this.openAddFieldModal();
-		});
+		this.renderInfoSection(container);
 
 		// Notes Section
 		this.renderNotesSection(container);
@@ -287,6 +245,143 @@ export class ContactPageView extends ItemView {
 		}
 
 		return `${years} years, ${months} months old`;
+	}
+
+	private renderInfoSection(container: HTMLElement) {
+		const infoSection = container.createEl("div", {
+			cls: "contact-info-section",
+		});
+
+		const fieldsContainer = infoSection.createEl("div", {
+			cls: "contact-fields-container",
+		});
+
+		const renderViewMode = () => {
+			fieldsContainer.empty();
+			fieldsContainer.classList.remove("editing");
+
+			// Render each field as read-only text
+			Object.entries(this.contactData)
+				.filter(
+					([key]) =>
+						![
+							"name",
+							"notes",
+							"interactions",
+							"created",
+							"updated",
+						].includes(key)
+				)
+				.forEach(([key, value]) => {
+					if (!value) return; // Skip empty values
+
+					const field = fieldsContainer.createEl("div", {
+						cls: "contact-field-view",
+					});
+
+					field.createEl("div", {
+						cls: "contact-field-label",
+						text: key,
+					});
+
+					field.createEl("div", {
+						cls: "contact-field-value",
+						text: value as string,
+					});
+				});
+
+			// Add edit button at the bottom
+			const editButton = fieldsContainer.createEl("button", {
+				cls: "contact-info-edit-button",
+				text: "Edit",
+			});
+
+			editButton.addEventListener("click", () => {
+				renderEditMode();
+			});
+		};
+
+		const renderEditMode = () => {
+			fieldsContainer.empty();
+			fieldsContainer.classList.add("editing");
+
+			// Standard fields first
+			Object.values(STANDARD_FIELDS)
+				.filter((field) => !SYSTEM_FIELDS.includes(field))
+				.forEach((field) => {
+					this.createInfoField(
+						fieldsContainer,
+						field,
+						this.contactData[field]
+					);
+				});
+
+			// Then custom fields
+			const excludedFields = [
+				...SYSTEM_FIELDS,
+				...Object.values(STANDARD_FIELDS).map((f) => f.toLowerCase()),
+				"created",
+				"updated",
+			];
+			Object.entries(this.contactData)
+				.filter(([key]) => !excludedFields.includes(key.toLowerCase()))
+				.forEach(([key, value]) => {
+					this.createInfoField(fieldsContainer, key, value as string);
+				});
+
+			// Add custom field button
+			const addFieldButton = fieldsContainer.createEl("button", {
+				text: "Add custom field",
+				cls: "contact-add-field-button",
+			});
+			addFieldButton.addEventListener("click", () => {
+				this.openAddFieldModal();
+			});
+
+			// Add done button
+			const doneButton = fieldsContainer.createEl("button", {
+				cls: "contact-info-done-button",
+				text: "Done",
+			});
+
+			doneButton.addEventListener("click", async () => {
+				await this.saveContactData();
+				renderViewMode();
+			});
+		};
+
+		// Initial render in view mode
+		renderViewMode();
+	}
+
+	private createInfoField(
+		container: HTMLElement,
+		field: string,
+		value: string
+	) {
+		const fieldContainer = container.createEl("div", {
+			cls: "contact-field",
+		});
+
+		fieldContainer.createEl("label", {
+			text: field,
+		});
+
+		const input = fieldContainer.createEl("input", {
+			cls: "contact-field-input",
+			attr: {
+				type: field === "birthday" ? "date" : "text",
+				placeholder: `Enter ${field.toLowerCase()}`,
+				value: value || "",
+				...(field === "relationship" && {
+					list: "relationship-types",
+				}),
+			},
+		});
+
+		input.addEventListener("change", () => {
+			this.updateContactData(field, input.value);
+		});
 	}
 
 	private renderNotesSection(container: HTMLElement) {
