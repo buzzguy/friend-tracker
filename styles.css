@@ -275,6 +275,10 @@ If your plugin does not need CSS, delete this file.
 	position: relative;
 }
 
+.contact-interaction-item:last-child {
+	border-bottom: none;
+}
+
 .contact-interaction-date {
 	color: var(--text-muted);
 	font-size: 0.85em;
