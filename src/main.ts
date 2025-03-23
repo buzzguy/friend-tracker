@@ -9,12 +9,15 @@ import {
 	VIEW_TYPE_CONTACT_PAGE,
 } from "@/views/ContactPageView";
 import { FriendTrackerSettingTab } from "./views/FriendTrackerView/settings";
+import { ContactOperations } from "@/services/ContactOperations";
 
 export default class FriendTracker extends Plugin {
 	settings: FriendTrackerSettings;
+	public contactOperations: ContactOperations;
 
 	async onload() {
 		await this.loadSettings();
+		this.contactOperations = new ContactOperations(this);
 
 		// On mobile, we should wait for layout-ready
 		this.app.workspace.onLayoutReady(() => {

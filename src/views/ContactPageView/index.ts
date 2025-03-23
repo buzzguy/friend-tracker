@@ -160,7 +160,7 @@ export class ContactPageView extends ItemView {
 
 		// Add age display if birthday exists
 		if (this.contactData.birthday) {
-			const ageText = this.calculateDetailedAge(
+			const ageText = this.plugin.contactOperations.calculateDetailedAge(
 				this.contactData.birthday
 			);
 			nameDisplay.createEl("span", {
@@ -254,11 +254,10 @@ export class ContactPageView extends ItemView {
 	}
 
 	private calculateDetailedAge(birthday: string): string {
-		const birthDate = new Date(birthday);
+		const birthDate = new Date(birthday + "T00:00:00Z");
 		const today = new Date();
 
 		// Reset times to midnight UTC to ensure consistent date comparison
-		birthDate.setUTCHours(0, 0, 0, 0);
 		const todayUTC = new Date(
 			Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
 		);
@@ -272,11 +271,9 @@ export class ContactPageView extends ItemView {
 			months--;
 			// Get last day of previous month
 			const lastMonth = new Date(
-				todayUTC.getFullYear(),
-				todayUTC.getMonth(),
-				0
+				Date.UTC(todayUTC.getFullYear(), todayUTC.getMonth(), 0)
 			);
-			days += lastMonth.getDate();
+			days += lastMonth.getUTCDate();
 		}
 
 		// Adjust for negative months
@@ -293,35 +290,9 @@ export class ContactPageView extends ItemView {
 	}
 
 	private calculateDaysUntilBirthday(birthday: string): number | null {
-		if (!birthday) return null;
-
-		const today = new Date();
-		// Use UTC methods to avoid timezone issues
-		const birthDate = new Date(birthday + "T00:00:00Z");
-
-		if (isNaN(birthDate.getTime())) return null;
-
-		// Get today's date in UTC
-		const todayUTC = new Date(
-			Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+		return this.plugin.contactOperations.calculateDaysUntilBirthday(
+			birthday
 		);
-		// Create this year's birthday in UTC
-		const birthdayUTC = new Date(
-			Date.UTC(
-				today.getFullYear(),
-				birthDate.getUTCMonth(),
-				birthDate.getUTCDate()
-			)
-		);
-
-		// If this year's birthday has already passed, use next year's birthday
-		if (birthdayUTC < todayUTC) {
-			birthdayUTC.setUTCFullYear(todayUTC.getUTCFullYear() + 1);
-		}
-
-		// Calculate days difference
-		const diffTime = birthdayUTC.getTime() - todayUTC.getTime();
-		return Math.round(diffTime / (1000 * 60 * 60 * 24)); // Round to avoid fractional days
 	}
 
 	private renderInfoSection(container: HTMLElement) {
