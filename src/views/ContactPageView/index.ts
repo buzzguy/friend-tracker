@@ -167,6 +167,36 @@ export class ContactPageView extends ItemView {
 				text: ageText,
 				cls: "contact-age-display",
 			});
+
+			const daysUntil = this.calculateDaysUntilBirthday(
+				this.contactData.birthday
+			);
+			if (daysUntil !== null) {
+				const countdownContainer = nameDisplay.createEl("div", {
+					cls: "contact-birthday-countdown",
+				});
+
+				// Add status dot if birthday is within a week
+				if (daysUntil <= 7) {
+					const dotContainer = countdownContainer.createEl("div", {
+						cls: "birthday-status-dot",
+					});
+					dotContainer.createEl("div", {
+						cls: "birthday-status-dot-inner",
+					});
+				}
+
+				const daysText =
+					daysUntil === 0
+						? "Birthday today!"
+						: daysUntil === 1
+						? "Birthday tomorrow!"
+						: `${daysUntil} days until birthday`;
+
+				countdownContainer.createSpan({
+					text: daysText,
+				});
+			}
 		}
 
 		editButton.addEventListener("click", () => {
@@ -224,27 +254,74 @@ export class ContactPageView extends ItemView {
 	}
 
 	private calculateDetailedAge(birthday: string): string {
-		const birthDate = new Date(birthday + "T00:00:00Z");
+		const birthDate = new Date(birthday);
 		const today = new Date();
+
+		// Reset times to midnight UTC to ensure consistent date comparison
+		birthDate.setUTCHours(0, 0, 0, 0);
 		const todayUTC = new Date(
 			Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
 		);
 
 		let years = todayUTC.getUTCFullYear() - birthDate.getUTCFullYear();
 		let months = todayUTC.getUTCMonth() - birthDate.getUTCMonth();
+		let days = todayUTC.getUTCDate() - birthDate.getUTCDate();
 
-		// Adjust for day of month
-		if (todayUTC.getUTCDate() < birthDate.getUTCDate()) {
+		// Adjust for negative days
+		if (days < 0) {
 			months--;
+			// Get last day of previous month
+			const lastMonth = new Date(
+				todayUTC.getFullYear(),
+				todayUTC.getMonth(),
+				0
+			);
+			days += lastMonth.getDate();
 		}
 
-		// Handle negative months
+		// Adjust for negative months
 		if (months < 0) {
 			years--;
 			months += 12;
 		}
 
-		return `${years} years, ${months} months old`;
+		// Format the output
+		if (days === 0) {
+			return `${years} years, ${months} months old`;
+		}
+		return `${years} years, ${months} months, ${days} days old`;
+	}
+
+	private calculateDaysUntilBirthday(birthday: string): number | null {
+		if (!birthday) return null;
+
+		const today = new Date();
+		// Use UTC methods to avoid timezone issues
+		const birthDate = new Date(birthday + "T00:00:00Z");
+
+		if (isNaN(birthDate.getTime())) return null;
+
+		// Get today's date in UTC
+		const todayUTC = new Date(
+			Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+		);
+		// Create this year's birthday in UTC
+		const birthdayUTC = new Date(
+			Date.UTC(
+				today.getFullYear(),
+				birthDate.getUTCMonth(),
+				birthDate.getUTCDate()
+			)
+		);
+
+		// If this year's birthday has already passed, use next year's birthday
+		if (birthdayUTC < todayUTC) {
+			birthdayUTC.setUTCFullYear(todayUTC.getUTCFullYear() + 1);
+		}
+
+		// Calculate days difference
+		const diffTime = birthdayUTC.getTime() - todayUTC.getTime();
+		return Math.round(diffTime / (1000 * 60 * 60 * 24)); // Round to avoid fractional days
 	}
 
 	private renderInfoSection(container: HTMLElement) {
@@ -287,9 +364,22 @@ export class ContactPageView extends ItemView {
 						text: key,
 					});
 
+					// Format birthday in view mode
+					const displayValue =
+						key === "birthday" && value
+							? new Date(value as string).toLocaleDateString(
+									"en-US",
+									{
+										month: "long",
+										day: "numeric",
+										year: "numeric",
+									}
+							  )
+							: value;
+
 					field.createEl("div", {
 						cls: "contact-field-value",
-						text: value as string,
+						text: displayValue as string,
 					});
 				});
 

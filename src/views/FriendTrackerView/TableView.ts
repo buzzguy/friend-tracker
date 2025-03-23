@@ -121,10 +121,8 @@ export class TableView {
 			const row = table.createEl("tr") as HTMLTableRowElement;
 
 			// Create name cell with click handler
-			const nameCell = row.createEl("td", {
-				cls: "friend-tracker-name-cell",
-				text: contact.name,
-			});
+			const nameCell = this.renderNameCell(contact);
+			row.appendChild(nameCell); // Add the name cell to the row
 			nameCell.addEventListener("click", (e) => {
 				e.stopPropagation(); // Stop event from bubbling
 				this.view.openContact(contact.file);
@@ -164,6 +162,28 @@ export class TableView {
 				this.view.openDeleteModal(contact.file);
 			});
 		});
+	}
+
+	private renderNameCell(contact: ContactWithCountdown): HTMLElement {
+		const cell = document.createElement("td");
+		cell.className = "friend-tracker-name-cell";
+
+		// Add status dot if birthday is within a week
+		if (
+			contact.daysUntilBirthday !== null &&
+			contact.daysUntilBirthday <= 7
+		) {
+			const dotContainer = cell.createEl("div", {
+				cls: "table-birthday-status-dot",
+			});
+			dotContainer.createEl("div", {
+				cls: "table-birthday-status-dot-inner",
+			});
+		}
+
+		cell.createSpan({ text: contact.name });
+
+		return cell;
 	}
 
 	private sortContacts(contacts: ContactWithCountdown[], sort: SortConfig) {
