@@ -130,12 +130,16 @@ export class ContactOperations {
 	private formatBirthday(dateStr: string): string {
 		if (!dateStr) return "";
 
-		const [year, month, day] = dateStr.split("-").map(Number);
-		const date = new Date(year, month - 1, day); // months are 0-based
+		// Parse the birthday and set it to local midnight
+		const [birthYear, birthMonth, birthDay] = dateStr
+			.split("-")
+			.map(Number);
+		const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+		birthDate.setHours(0, 0, 0, 0);
 
-		if (isNaN(date.getTime())) return dateStr;
+		if (isNaN(birthDate.getTime())) return dateStr;
 
-		return date.toLocaleDateString("en-US", {
+		return birthDate.toLocaleDateString("en-US", {
 			month: "long",
 			day: "numeric",
 		});

@@ -338,14 +338,18 @@ export class ContactPageView extends ItemView {
 					// Format birthday in view mode
 					const displayValue =
 						key === "birthday" && value
-							? new Date(value as string).toLocaleDateString(
-									"en-US",
-									{
+							? (() => {
+									const [year, month, day] = (value as string)
+										.split("-")
+										.map(Number);
+									const date = new Date(year, month - 1, day);
+									date.setHours(0, 0, 0, 0);
+									return date.toLocaleDateString("en-US", {
 										month: "long",
 										day: "numeric",
 										year: "numeric",
-									}
-							  )
+									});
+							  })()
 							: value;
 
 					field.createEl("div", {
