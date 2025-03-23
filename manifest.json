@@ -3,7 +3,7 @@
 	"name": "Friend Tracker",
 	"version": "1.2.7",
 	"minAppVersion": "1.4.14",
-	"description": "Effortlessly nurture your relationships. Remember birthdays, capture meaningful moments, and stay connected with the people who matter most. Track contacts, set reminders, log interactions, and manage your personal CRM within Obsidian.",
+	"description": "Keep track of friends, birthdays, reminders, and interactions in Obsidian. Build a personal CRM, log connections, and stay organized inside your vault.",
 	"author": "Dan Au",
 	"authorUrl": "https://dausign.com",
 	"isDesktopOnly": false

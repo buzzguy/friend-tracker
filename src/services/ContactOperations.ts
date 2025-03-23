@@ -82,6 +82,51 @@ export class ContactOperations {
 		return age;
 	}
 
+	public calculateDetailedAge(birthday: string): string {
+		if (!birthday) return "";
+
+		// Parse the birthday and set it to local midnight
+		const [birthYear, birthMonth, birthDay] = birthday
+			.split("-")
+			.map(Number);
+		const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+		birthDate.setHours(0, 0, 0, 0);
+
+		if (isNaN(birthDate.getTime())) return "";
+
+		// Get today at local midnight
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
+		let years = today.getFullYear() - birthDate.getFullYear();
+		let months = today.getMonth() - birthDate.getMonth();
+		let days = today.getDate() - birthDate.getDate();
+
+		// Adjust for negative days
+		if (days < 0) {
+			months--;
+			// Get last day of previous month
+			const lastMonth = new Date(
+				today.getFullYear(),
+				today.getMonth(),
+				0
+			);
+			days += lastMonth.getDate();
+		}
+
+		// Adjust for negative months
+		if (months < 0) {
+			years--;
+			months += 12;
+		}
+
+		// Format the output
+		if (days === 0) {
+			return `${years} years, ${months} months old`;
+		}
+		return `${years} years, ${months} months, ${days} days old`;
+	}
+
 	private formatBirthday(dateStr: string): string {
 		if (!dateStr) return "";
 
@@ -96,36 +141,38 @@ export class ContactOperations {
 		});
 	}
 
-	private calculateDaysUntilBirthday(birthday: string): number | null {
+	public calculateDaysUntilBirthday(birthday: string): number | null {
 		if (!birthday) return null;
 
-		const today = new Date();
-		// Use UTC methods to avoid timezone issues
-		const birthDate = new Date(birthday + "T00:00:00Z");
+		// Parse the birthday and set it to local midnight
+		const [birthYear, birthMonth, birthDay] = birthday
+			.split("-")
+			.map(Number);
+		const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+		birthDate.setHours(0, 0, 0, 0);
 
 		if (isNaN(birthDate.getTime())) return null;
 
-		// Get today's date in UTC
-		const todayUTC = new Date(
-			Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+		// Get today at local midnight
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
+		// Create this year's birthday at local midnight
+		const thisYearBirthday = new Date(
+			today.getFullYear(),
+			birthDate.getMonth(),
+			birthDate.getDate()
 		);
-		// Create this year's birthday in UTC
-		const birthdayUTC = new Date(
-			Date.UTC(
-				today.getFullYear(),
-				birthDate.getUTCMonth(),
-				birthDate.getUTCDate()
-			)
-		);
+		thisYearBirthday.setHours(0, 0, 0, 0);
 
 		// If this year's birthday has already passed, use next year's birthday
-		if (birthdayUTC < todayUTC) {
-			birthdayUTC.setUTCFullYear(todayUTC.getUTCFullYear() + 1);
+		if (thisYearBirthday < today) {
+			thisYearBirthday.setFullYear(today.getFullYear() + 1);
 		}
 
 		// Calculate days difference
-		const diffTime = birthdayUTC.getTime() - todayUTC.getTime();
-		return Math.round(diffTime / (1000 * 60 * 60 * 24)); // Round to avoid fractional days
+		const diffTime = thisYearBirthday.getTime() - today.getTime();
+		return Math.round(diffTime / (1000 * 60 * 60 * 24));
 	}
 
 	private formatDaysAgo(dateStr: string): string {

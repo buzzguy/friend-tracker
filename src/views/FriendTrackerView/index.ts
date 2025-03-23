@@ -15,6 +15,7 @@ export class FriendTrackerView extends ItemView {
 	private contactOps: ContactOperations;
 	private fileChangeHandler: EventRef | null = null;
 	private isRefreshing = false;
+	private _contacts: ContactWithCountdown[] | null = null;
 
 	constructor(leaf: WorkspaceLeaf, private plugin: FriendTracker) {
 		super(leaf);
@@ -89,21 +90,86 @@ export class FriendTrackerView extends ItemView {
 			})
 		);
 
+		// Add visibility change handler
+		document.addEventListener(
+			"visibilitychange",
+			this.handleVisibilityChange
+		);
+		window.addEventListener("focus", this.handleWindowFocus);
+
 		await this.refresh();
 	}
+
+	onunload() {
+		document.removeEventListener(
+			"visibilitychange",
+			this.handleVisibilityChange
+		);
+		window.removeEventListener("focus", this.handleWindowFocus);
+	}
+
+	private handleVisibilityChange = () => {
+		if (document.visibilityState === "visible") {
+			this.refresh();
+		}
+	};
+
+	private handleWindowFocus = () => {
+		this.refresh();
+	};
 
 	async refresh() {
 		if (this.isRefreshing) return;
 		this.isRefreshing = true;
 
 		try {
+			// Clear any cached data
+			this._contacts = null;
+
+			// Get the container and completely clear it
+			const container = this.containerEl.children[1] as HTMLElement;
+			// Remove all child elements
+			while (container.firstChild) {
+				container.removeChild(container.firstChild);
+			}
+
+			// Get contacts and apply sort if needed
 			const contacts = await this.contactOps.getContacts();
-			const container = this.containerEl.children[1];
-			container.empty();
+			const sortConfig: SortConfig =
+				this.currentSort.column && this.currentSort.direction
+					? this.currentSort
+					: {
+							column: "name" as keyof Omit<
+								ContactWithCountdown,
+								"file"
+							>,
+							direction: "asc" as "asc" | "desc",
+					  };
+
+			const sortedContacts = contacts.sort((a, b) => {
+				const valueA = a[sortConfig.column];
+				const valueB = b[sortConfig.column];
+
+				// Handle null values in sorting
+				if (valueA === null && valueB === null) return 0;
+				if (valueA === null)
+					return sortConfig.direction === "asc" ? -1 : 1;
+				if (valueB === null)
+					return sortConfig.direction === "asc" ? 1 : -1;
+
+				if (valueA < valueB)
+					return sortConfig.direction === "asc" ? -1 : 1;
+				if (valueA > valueB)
+					return sortConfig.direction === "asc" ? 1 : -1;
+				return 0;
+			});
+
+			// Create a fresh container for the table
+			const tableContainer = container.createDiv();
 			await this.tableView.render(
-				container as HTMLElement,
-				contacts,
-				this.currentSort
+				tableContainer,
+				sortedContacts,
+				sortConfig
 			);
 		} finally {
 			this.isRefreshing = false;
@@ -113,5 +179,13 @@ export class FriendTrackerView extends ItemView {
 	private isContactFile(file: TFile): boolean {
 		const contactFolder = this.plugin.settings.contactsFolder;
 		return file.path.startsWith(contactFolder + "/");
+	}
+
+	private async sortContacts(
+		column: keyof Omit<ContactWithCountdown, "file">,
+		direction: "asc" | "desc"
+	) {
+		this.currentSort = { column, direction };
+		await this.refresh();
 	}
 }
