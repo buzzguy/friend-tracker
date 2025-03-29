@@ -201,6 +201,24 @@ export class TableView {
 					: bValue - aValue;
 			}
 
+			// Add special handling for daysUntilBirthday
+			if (sort.column === "daysUntilBirthday") {
+				// Handle null values
+				if (
+					a.daysUntilBirthday === null &&
+					b.daysUntilBirthday === null
+				)
+					return 0;
+				if (a.daysUntilBirthday === null) return 1;
+				if (b.daysUntilBirthday === null) return -1;
+
+				// Normal numeric comparison that respects sort direction
+				return (
+					(a.daysUntilBirthday - b.daysUntilBirthday) *
+					(sort.direction === "asc" ? 1 : -1)
+				);
+			}
+
 			const aValue = a[sort.column];
 			const bValue = b[sort.column];
 
