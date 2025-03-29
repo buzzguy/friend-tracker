@@ -168,6 +168,28 @@ export class ContactPageView extends ItemView {
 				cls: "contact-age-display",
 			});
 
+			// Add zodiac display
+			const year = parseInt(this.contactData.birthday.split("-")[0]);
+			const animals = [
+				"Rat",
+				"Ox",
+				"Tiger",
+				"Rabbit",
+				"Dragon",
+				"Snake",
+				"Horse",
+				"Goat",
+				"Monkey",
+				"Rooster",
+				"Dog",
+				"Pig",
+			];
+			const zodiac = animals[(year - 4) % 12];
+			nameDisplay.createEl("span", {
+				text: `Year of the ${zodiac}`,
+				cls: "contact-age-display",
+			});
+
 			const daysUntil = this.calculateDaysUntilBirthday(
 				this.contactData.birthday
 			);
