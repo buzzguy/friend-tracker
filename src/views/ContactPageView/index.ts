@@ -209,26 +209,38 @@ export class ContactPageView extends ItemView {
 					cls: "contact-birthday-countdown",
 				});
 
-				// Add status dot if birthday is within a week
-				if (daysUntil <= 7) {
-					const dotContainer = countdownContainer.createEl("div", {
-						cls: "birthday-status-dot",
+				if (daysUntil === 0) {
+					// Birthday today - show cake
+					countdownContainer.createEl("div", {
+						cls: "table-birthday-indicator birthday-today",
+						text: "🎂",
 					});
-					dotContainer.createEl("div", {
-						cls: "birthday-status-dot-inner",
+					countdownContainer.createSpan({
+						text: "Birthday today!",
+					});
+				} else {
+					// Show dot if within a week
+					if (daysUntil <= 7) {
+						const dotContainer = countdownContainer.createEl(
+							"div",
+							{
+								cls: "birthday-status-dot",
+							}
+						);
+						dotContainer.createEl("div", {
+							cls: "birthday-status-dot-inner",
+						});
+					}
+
+					const daysText =
+						daysUntil === 1
+							? "Birthday tomorrow!"
+							: `${daysUntil} days until birthday`;
+
+					countdownContainer.createSpan({
+						text: daysText,
 					});
 				}
-
-				const daysText =
-					daysUntil === 0
-						? "Birthday today!"
-						: daysUntil === 1
-						? "Birthday tomorrow!"
-						: `${daysUntil} days until birthday`;
-
-				countdownContainer.createSpan({
-					text: daysText,
-				});
 			}
 		}
 

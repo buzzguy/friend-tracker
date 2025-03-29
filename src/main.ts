@@ -68,9 +68,51 @@ export default class FriendTracker extends Plugin {
 
 			// Add settings tab
 			this.addSettingTab(new FriendTrackerSettingTab(this.app, this));
+
+			// Check for birthdays after everything is initialized
+			await this.checkBirthdays();
 		} catch (error) {
 			console.error("Friend Tracker failed to load:", error);
 			new Notice("Friend Tracker failed to load: " + error.message);
+		}
+	}
+
+	private async checkBirthdays() {
+		const contacts = await this.contactOperations.getContacts();
+		const birthdayContacts = contacts.filter(
+			(c) => c.daysUntilBirthday === 0
+		);
+
+		if (birthdayContacts.length > 0) {
+			if (birthdayContacts.length === 1) {
+				new Notice(
+					`🎂 It's ${birthdayContacts[0].name}'s birthday today!`,
+					8000 // Show for 8 seconds
+				);
+			} else {
+				const names = birthdayContacts.map((c) => c.name);
+				const lastPerson = names.pop();
+				const nameList = names.join(", ") + " and " + lastPerson;
+				new Notice(`🎂 It's ${nameList}'s birthday today!`, 8000);
+			}
+		}
+
+		// Optional: Also notify about tomorrow's birthdays
+		const tomorrowBirthdays = contacts.filter(
+			(c) => c.daysUntilBirthday === 1
+		);
+		if (tomorrowBirthdays.length > 0) {
+			if (tomorrowBirthdays.length === 1) {
+				new Notice(
+					`🎈 ${tomorrowBirthdays[0].name}'s birthday is tomorrow!`,
+					6000 // Show for 6 seconds (slightly shorter for tomorrow's)
+				);
+			} else {
+				const names = tomorrowBirthdays.map((c) => c.name);
+				const lastPerson = names.pop();
+				const nameList = names.join(", ") + " and " + lastPerson;
+				new Notice(`🎈 ${nameList}'s birthdays are tomorrow!`, 6000);
+			}
 		}
 	}
 
