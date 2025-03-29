@@ -168,6 +168,39 @@ export class ContactPageView extends ItemView {
 				cls: "contact-age-display",
 			});
 
+			// Add both zodiac displays
+			const [year, month, day] = this.contactData.birthday
+				.split("-")
+				.map(Number);
+			const animals = [
+				"Rat",
+				"Ox",
+				"Tiger",
+				"Rabbit",
+				"Dragon",
+				"Snake",
+				"Horse",
+				"Goat",
+				"Monkey",
+				"Rooster",
+				"Dog",
+				"Pig",
+			];
+			const chineseZodiac = animals[(year - 4) % 12];
+			const westernZodiac = this.getZodiacSign(month, day);
+
+			const season = this.getSeason(month, day);
+			const birthstone = this.getBirthstone(month);
+
+			nameDisplay.createEl("span", {
+				text: `${westernZodiac} • Year of the ${chineseZodiac}`,
+				cls: "contact-age-display",
+			});
+			nameDisplay.createEl("span", {
+				text: `${season} baby • Birthstone: ${birthstone}`,
+				cls: "contact-age-display",
+			});
+
 			const daysUntil = this.calculateDaysUntilBirthday(
 				this.contactData.birthday
 			);
@@ -293,6 +326,76 @@ export class ContactPageView extends ItemView {
 		return this.plugin.contactOperations.calculateDaysUntilBirthday(
 			birthday
 		);
+	}
+
+	private getZodiacSign(month: number, day: number): string {
+		if ((month === 3 && day >= 21) || (month === 4 && day <= 19))
+			return "Aries";
+		if ((month === 4 && day >= 20) || (month === 5 && day <= 20))
+			return "Taurus";
+		if ((month === 5 && day >= 21) || (month === 6 && day <= 20))
+			return "Gemini";
+		if ((month === 6 && day >= 21) || (month === 7 && day <= 22))
+			return "Cancer";
+		if ((month === 7 && day >= 23) || (month === 8 && day <= 22))
+			return "Leo";
+		if ((month === 8 && day >= 23) || (month === 9 && day <= 22))
+			return "Virgo";
+		if ((month === 9 && day >= 23) || (month === 10 && day <= 22))
+			return "Libra";
+		if ((month === 10 && day >= 23) || (month === 11 && day <= 21))
+			return "Scorpio";
+		if ((month === 11 && day >= 22) || (month === 12 && day <= 21))
+			return "Sagittarius";
+		if ((month === 12 && day >= 22) || (month === 1 && day <= 19))
+			return "Capricorn";
+		if ((month === 1 && day >= 20) || (month === 2 && day <= 18))
+			return "Aquarius";
+		return "Pisces";
+	}
+
+	private getSeason(month: number, day: number): string {
+		// Northern hemisphere seasons
+		if (
+			(month === 3 && day >= 20) ||
+			month === 4 ||
+			month === 5 ||
+			(month === 6 && day < 21)
+		)
+			return "Spring";
+		if (
+			(month === 6 && day >= 21) ||
+			month === 7 ||
+			month === 8 ||
+			(month === 9 && day < 22)
+		)
+			return "Summer";
+		if (
+			(month === 9 && day >= 22) ||
+			month === 10 ||
+			month === 11 ||
+			(month === 12 && day < 21)
+		)
+			return "Autumn";
+		return "Winter";
+	}
+
+	private getBirthstone(month: number): string {
+		const stones: Record<number, string> = {
+			1: "Garnet",
+			2: "Amethyst",
+			3: "Aquamarine",
+			4: "Diamond",
+			5: "Emerald",
+			6: "Pearl",
+			7: "Ruby",
+			8: "Peridot",
+			9: "Sapphire",
+			10: "Opal",
+			11: "Topaz",
+			12: "Turquoise",
+		};
+		return stones[month] || "Unknown";
 	}
 
 	private renderInfoSection(container: HTMLElement) {
