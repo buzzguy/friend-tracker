@@ -926,3 +926,69 @@ If your plugin does not need CSS, delete this file.
 .contact-birthday-countdown .birthday-status-dot {
 	margin-left: -2px;
 }
+
+.contact-tabs {
+	display: flex;
+	border-bottom: 1px solid var(--background-modifier-border);
+	margin: 0;
+	padding: 0 20px;
+	gap: 12px;
+}
+
+.contact-tab {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 2px;
+	color: var(--text-muted);
+	font-size: 14px;
+	background: none !important;
+	box-shadow: none !important;
+	border: none;
+	border-bottom: 2px solid transparent;
+	margin-bottom: -1px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-weight: 500;
+	-webkit-appearance: none;
+	appearance: none;
+	border-radius: 0;
+}
+
+.contact-tab:hover {
+	color: var(--text-normal);
+	background: none !important;
+}
+
+.contact-tab:focus {
+	outline: none !important;
+	box-shadow: none !important;
+	background: none !important;
+}
+
+.contact-tab.active {
+	color: var(--text-accent);
+	border-bottom-color: var(--text-accent);
+	background: none !important;
+}
+
+/* Remove border-top from sections */
+.contact-notes-section,
+.contact-interactions,
+.contact-extras-section {
+	border-top: none;
+}
+
+/* Make tabs more compact on mobile */
+@media (max-width: 600px) {
+	.contact-tabs {
+		gap: 16px;
+		padding: 0 16px;
+	}
+}
+
+.contact-content {
+	padding: 20px;
+	overflow: auto;
+}

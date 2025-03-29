@@ -236,5 +236,24 @@ export class FriendTrackerSettingTab extends PluginSettingTab {
 						});
 				});
 		});
+
+		new Setting(containerEl)
+			.setName("Default tab")
+			.setDesc("Choose which tab opens by default")
+			.addDropdown((dropdown) => {
+				dropdown
+					.addOption("notes", "Notes")
+					.addOption("interactions", "Interactions")
+					.addOption("markdown", "Markdown")
+					.setValue(this.plugin.settings.defaultActiveTab)
+					.onChange(
+						async (
+							value: "notes" | "interactions" | "markdown"
+						) => {
+							this.plugin.settings.defaultActiveTab = value;
+							await this.plugin.saveSettings();
+						}
+					);
+			});
 	}
 }

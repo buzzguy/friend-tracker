@@ -25,6 +25,7 @@ export class ContactPageView extends ItemView {
 	private contactFields: ContactFields;
 	private interactionView: InteractionView;
 	public plugin: FriendTracker;
+	private activeTab: "notes" | "interactions" | "markdown";
 
 	public getRelationshipTypes(): string[] {
 		return this.plugin.settings.relationshipTypes;
@@ -46,6 +47,7 @@ export class ContactPageView extends ItemView {
 		this.plugin = _plugin;
 		this.contactFields = new ContactFields(this);
 		this.interactionView = new InteractionView(this);
+		this.activeTab = this.plugin.settings.defaultActiveTab;
 	}
 
 	getViewType(): string {
@@ -105,28 +107,73 @@ export class ContactPageView extends ItemView {
 			return;
 		}
 
-		// Create header with editable name
+		// Header with name
 		const header = container.createEl("div", {
 			cls: "contact-page-header",
 		});
-
 		const nameContainer = header.createEl("div", {
 			cls: "contact-name-container",
 		});
-
 		this.renderNameSection(nameContainer);
 
-		// Basic Info Section
-		this.renderInfoSection(container);
+		// Info section (always visible)
+		const infoSection = container.createEl("div", {
+			cls: "contact-info-section",
+		});
+		this.renderInfoSection(infoSection);
 
-		// Notes Section
-		this.renderNotesSection(container);
+		// Tabs container
+		const tabsContainer = container.createEl("div", {
+			cls: "contact-tabs",
+		});
 
-		// Interactions Section
-		this.renderInteractionsSection(container);
+		const tabs = [
+			{ id: "notes" as const, icon: "pencil", label: "Notes" },
+			{
+				id: "interactions" as const,
+				icon: "clock",
+				label: "Interactions",
+			},
+			{
+				id: "markdown" as const,
+				icon: "document",
+				label: "Markdown",
+			},
+		];
 
-		// Extras Section
-		this.renderExtrasSection(container);
+		tabs.forEach((tab) => {
+			const tabButton = tabsContainer.createEl("button", {
+				cls: `contact-tab ${this.activeTab === tab.id ? "active" : ""}`,
+			});
+
+			setIcon(tabButton, tab.icon);
+			tabButton.createSpan({ text: tab.label });
+
+			tabButton.addEventListener("click", async () => {
+				this.activeTab = tab.id;
+				this.plugin.settings.defaultActiveTab = tab.id;
+				await this.plugin.saveSettings();
+				this.render();
+			});
+		});
+
+		// Content container for tab content
+		const contentContainer = container.createEl("div", {
+			cls: "contact-content",
+		});
+
+		// Render content based on active tab
+		switch (this.activeTab) {
+			case "notes":
+				this.renderNotesSection(contentContainer);
+				break;
+			case "interactions":
+				this.renderInteractionsSection(contentContainer);
+				break;
+			case "markdown":
+				this.renderExtrasSection(contentContainer);
+				break;
+		}
 	}
 
 	private renderNameSection(container: HTMLElement) {
