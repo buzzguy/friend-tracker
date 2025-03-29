@@ -694,7 +694,7 @@ If your plugin does not need CSS, delete this file.
 .contact-birthday-countdown {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
+	gap: 12px;
 	margin-top: 4px;
 	background: var(--background-primary);
 	padding: 4px 8px;
@@ -702,6 +702,7 @@ If your plugin does not need CSS, delete this file.
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 	color: var(--text-muted);
 	font-size: 0.9em;
+	position: relative;
 }
 
 .birthday-status-dot {
@@ -896,4 +897,32 @@ If your plugin does not need CSS, delete this file.
 :root {
 	--color-green: rgb(74, 222, 128);
 	--color-green-rgb: 74, 222, 128;
+}
+
+.table-birthday-indicator {
+	position: absolute;
+	left: -10px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 14px;
+	line-height: 1;
+}
+
+.table-birthday-indicator.birthday-today {
+	animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+	0%,
+	100% {
+		transform: translateY(-50%);
+	}
+	50% {
+		transform: translateY(-65%);
+	}
+}
+
+.contact-birthday-countdown .table-birthday-indicator,
+.contact-birthday-countdown .birthday-status-dot {
+	margin-left: -2px;
 }

@@ -168,17 +168,22 @@ export class TableView {
 		const cell = document.createElement("td");
 		cell.className = "friend-tracker-name-cell";
 
-		// Add status dot if birthday is within a week
-		if (
-			contact.daysUntilBirthday !== null &&
-			contact.daysUntilBirthday <= 7
-		) {
-			const dotContainer = cell.createEl("div", {
-				cls: "table-birthday-status-dot",
-			});
-			dotContainer.createEl("div", {
-				cls: "table-birthday-status-dot-inner",
-			});
+		if (contact.daysUntilBirthday !== null) {
+			if (contact.daysUntilBirthday === 0) {
+				// Birthday today - show cake
+				const indicator = cell.createEl("div", {
+					cls: "table-birthday-indicator birthday-today",
+					text: "🎂",
+				});
+			} else if (contact.daysUntilBirthday <= 7) {
+				// Within a week - show green dot
+				const dotContainer = cell.createEl("div", {
+					cls: "table-birthday-status-dot",
+				});
+				dotContainer.createEl("div", {
+					cls: "table-birthday-status-dot-inner",
+				});
+			}
 		}
 
 		cell.createSpan({ text: contact.name });
