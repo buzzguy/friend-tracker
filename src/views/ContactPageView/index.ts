@@ -201,7 +201,7 @@ export class ContactPageView extends ItemView {
 		});
 
 		const editButton = editContainer.createEl("button", {
-			cls: "contact-name-edit",
+			cls: "friend-tracker-button button-icon contact-name-edit",
 		});
 		setIcon(editButton, "pencil");
 
@@ -522,7 +522,7 @@ export class ContactPageView extends ItemView {
 
 			// Add edit button at the bottom
 			const editButton = fieldsContainer.createEl("button", {
-				cls: "contact-info-edit-button",
+				cls: "friend-tracker-button",
 				text: "Edit",
 			});
 
@@ -561,8 +561,8 @@ export class ContactPageView extends ItemView {
 
 			// Add custom field button
 			const addFieldButton = fieldsContainer.createEl("button", {
+				cls: "friend-tracker-button button-outlined",
 				text: "Add custom field",
-				cls: "contact-add-field-button",
 			});
 			addFieldButton.addEventListener("click", () => {
 				this.openAddFieldModal();
@@ -570,7 +570,7 @@ export class ContactPageView extends ItemView {
 
 			// Add done button
 			const doneButton = fieldsContainer.createEl("button", {
-				cls: "contact-info-done-button",
+				cls: "friend-tracker-button button-primary button-full-width",
 				text: "Done",
 			});
 
@@ -618,7 +618,6 @@ export class ContactPageView extends ItemView {
 		const notesSection = container.createEl("div", {
 			cls: "contact-notes-section",
 		});
-		notesSection.createEl("h2", { text: "Notes" });
 
 		const notesInput = notesSection.createEl("textarea", {
 			cls: "contact-notes-input",
@@ -653,11 +652,20 @@ export class ContactPageView extends ItemView {
 			cls: "contact-interactions-header",
 		});
 
-		headerContainer.createEl("h2", { text: "Recent interactions" });
+		// Add helper text if no interactions
+		if (
+			!Array.isArray(this.contactData.interactions) ||
+			this.contactData.interactions.length === 0
+		) {
+			headerContainer.createEl("div", {
+				cls: "section-helper-text",
+				text: "Log meaningful touchpoints like meetings, calls, or important conversations to help maintain strong relationships",
+			});
+		}
 
 		const addButton = headerContainer.createEl("button", {
+			cls: "friend-tracker-button button-align-right",
 			text: "Add interaction",
-			cls: "contact-add-interaction-button",
 		});
 		addButton.addEventListener("click", () => {
 			this.openAddInteractionModal();
@@ -682,13 +690,22 @@ export class ContactPageView extends ItemView {
 			cls: "contact-extras-header",
 		});
 
-		headerContainer.createEl("h2", { text: "Additional notes" });
+		// Add helper text if no markdown content
+		const content = await this.app.vault.read(this._file);
+		const extrasContent =
+			content.split(/^---\n([\s\S]*?)\n---/).pop() || "";
+
+		if (!extrasContent.trim()) {
+			headerContainer.createEl("div", {
+				cls: "section-helper-text",
+				text: "Add formatted text, links, and other Markdown content",
+			});
+		}
 
 		const editButton = headerContainer.createEl("button", {
-			cls: "contact-extras-edit",
-			attr: { "aria-label": "Edit in markdown" },
+			cls: "friend-tracker-button button-align-right",
+			text: "Edit markdown",
 		});
-		setIcon(editButton, "pencil");
 
 		editButton.addEventListener("click", () => {
 			this.app.workspace.openLinkText(this._file?.path || "", "", true);

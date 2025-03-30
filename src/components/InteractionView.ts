@@ -56,7 +56,7 @@ export class InteractionView {
 
 		// Edit button
 		const editBtn = actions.createEl("button", {
-			cls: "contact-interaction-edit",
+			cls: "friend-tracker-button button-icon",
 			attr: { "aria-label": "Edit interaction" },
 		});
 		setIcon(editBtn, "pencil");
@@ -66,7 +66,7 @@ export class InteractionView {
 
 		// Delete button
 		const deleteBtn = actions.createEl("button", {
-			cls: "contact-interaction-delete",
+			cls: "friend-tracker-button button-icon button-danger",
 			attr: { "aria-label": "Delete interaction" },
 		});
 		setIcon(deleteBtn, "trash");

@@ -18,7 +18,7 @@ export class TableView {
 
 		const addButton = headerContainer.createEl("button", {
 			text: "Add contact",
-			cls: "friend-tracker-add-button",
+			cls: "friend-tracker-button button-outlined",
 		});
 		addButton.addEventListener("click", () =>
 			this.view.openAddContactModal()

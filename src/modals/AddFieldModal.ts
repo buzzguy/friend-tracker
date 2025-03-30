@@ -36,7 +36,7 @@ export class AddFieldModal extends Modal {
 		form.createEl("button", {
 			text: "Add field",
 			attr: { type: "submit" },
-			cls: "contact-add-field-submit",
+			cls: "friend-tracker-button button-primary button-full-width",
 		});
 	}
 

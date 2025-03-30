@@ -49,19 +49,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 .friend-tracker-add-button {
-	padding: 6px 12px;
-	background-color: var(--background-modifier-border);
-	color: var(--text-normal);
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
-	font-size: 0.9em;
-	transition: all 0.2s ease;
-}
-
-.friend-tracker-add-button:hover {
-	background-color: var(--background-modifier-hover);
-	color: var(--text-normal);
+	/* Remove all styles */
 }
 
 .friend-tracker-empty-state {
@@ -189,13 +177,21 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Contact Page Styles */
+.contact-page-header,
+.contact-info-section,
+.contact-notes-section,
+.contact-interactions,
+.contact-extras-section {
+	padding: 12px 16px;
+}
+
 .contact-page-header {
-	padding: 20px;
+	padding: 12px 16px;
 	border-bottom: 1px solid var(--background-modifier-border);
 }
 
 .contact-info-section {
-	padding: 20px;
+	padding: 12px 16px;
 }
 
 .contact-field {
@@ -236,26 +232,23 @@ If your plugin does not need CSS, delete this file.
 
 /* Interactions Section */
 .contact-interactions {
-	padding: 20px;
+	padding: 12px 16px;
 	border-top: 1px solid var(--background-modifier-border);
 }
 
 .contact-interactions-header {
-	display: flex;
-	justify-content: space-between;
+	display: grid;
+	grid-template-columns: 1fr auto;
 	align-items: center;
-	margin-bottom: 16px;
-}
-
-.contact-interactions-header h2 {
-	margin: 0;
+	gap: 8px;
+	margin: 12px 0 8px;
 }
 
 .contact-add-interaction-button {
 	padding: 6px 12px;
-	background-color: var(--background-modifier-border);
-	color: var(--text-normal);
-	border: none;
+	background: none;
+	color: var(--text-muted);
+	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	cursor: pointer;
 	font-size: 0.9em;
@@ -263,14 +256,16 @@ If your plugin does not need CSS, delete this file.
 }
 
 .contact-add-interaction-button:hover {
-	background-color: var(--background-modifier-hover);
 	color: var(--text-normal);
+	border-color: var(--text-muted);
+	background: none;
 }
 
 .contact-interaction-item {
 	display: flex;
 	flex-direction: column;
-	padding: 12px;
+	padding: 8px 0;
+	margin: 0;
 	border-bottom: 1px solid var(--background-modifier-border);
 	position: relative;
 }
@@ -305,7 +300,7 @@ If your plugin does not need CSS, delete this file.
 
 /* Extras Section */
 .contact-extras-section {
-	padding: 20px;
+	padding: 12px 16px;
 	border-top: 1px solid var(--background-modifier-border);
 }
 
@@ -349,9 +344,9 @@ If your plugin does not need CSS, delete this file.
 .contact-add-interaction-button {
 	margin-top: 8px;
 	padding: 6px 12px;
-	background-color: var(--background-modifier-border);
-	color: var(--text-normal);
-	border: none;
+	background: none;
+	color: var(--text-muted);
+	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	cursor: pointer;
 	font-size: 0.9em;
@@ -360,9 +355,9 @@ If your plugin does not need CSS, delete this file.
 
 .contact-add-field-button:hover,
 .contact-add-interaction-button:hover {
-	background-color: var(--background-modifier-hover);
 	color: var(--text-normal);
-	opacity: 1;
+	border-color: var(--text-muted);
+	background: none;
 }
 
 .contact-interaction-edit,
@@ -491,23 +486,29 @@ If your plugin does not need CSS, delete this file.
 }
 
 .contact-name-edit {
-	background: none;
-	border: none;
-	padding: 2px;
+	background: none !important;
+	border: none !important;
+	padding: 4px;
 	cursor: pointer;
 	color: var(--text-muted);
-	font-size: 0.8em;
-	height: 20px;
-	width: 20px;
+	font-size: 1.2em;
+	height: 28px;
+	width: 28px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	transition: color 0.2s ease;
+	transition: all 0.2s ease;
 	margin-left: 8px;
+	opacity: 0.5;
+}
+
+.contact-name-row:hover .contact-name-edit {
+	opacity: 1;
 }
 
 .contact-name-edit:hover {
 	color: var(--text-normal);
+	background: var(--background-modifier-hover) !important;
 }
 
 .contact-name-section {
@@ -526,7 +527,7 @@ If your plugin does not need CSS, delete this file.
 
 /* Notes Section */
 .contact-notes-section {
-	padding: 20px;
+	padding: 12px 16px;
 	border-top: 1px solid var(--background-modifier-border);
 }
 
@@ -553,6 +554,7 @@ If your plugin does not need CSS, delete this file.
 	min-height: 100px;
 	overflow: hidden;
 	transition: height 0.1s ease;
+	margin-top: 12px;
 }
 
 .contact-notes-input:hover {
@@ -637,13 +639,13 @@ If your plugin does not need CSS, delete this file.
 	justify-content: flex-end;
 }
 
-.friend-tracker-modal-submit {
-	padding: 8px 16px;
-	background-color: var(--interactive-accent);
-	color: var(--text-on-accent);
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
+/* Update modal button styles */
+.modal .friend-tracker-button {
+	margin-top: 16px;
+}
+
+.modal .friend-tracker-button.button-primary {
+	width: 100%; /* Make modal submit buttons full width */
 }
 
 .friend-tracker-add-contact-form {
@@ -797,14 +799,11 @@ If your plugin does not need CSS, delete this file.
 }
 
 .contact-extras-header {
-	display: flex;
+	display: grid;
+	grid-template-columns: 1fr auto;
 	align-items: center;
 	gap: 8px;
-	margin-bottom: 16px;
-}
-
-.contact-extras-header h2 {
-	margin: 0;
+	margin: 12px 0 8px;
 }
 
 .contact-extras-edit {
@@ -836,8 +835,8 @@ If your plugin does not need CSS, delete this file.
 .contact-info-done-button {
 	margin-top: 16px;
 	padding: 6px 12px;
-	background-color: var(--background-modifier-border);
-	color: var(--text-normal);
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;
@@ -848,8 +847,8 @@ If your plugin does not need CSS, delete this file.
 
 .contact-info-edit-button:hover,
 .contact-info-done-button:hover {
-	background-color: var(--background-modifier-hover);
-	color: var(--text-normal);
+	background-color: var(--interactive-accent-hover);
+	color: var(--text-on-accent);
 }
 
 .contact-info-done-button {
@@ -867,6 +866,7 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
+	margin: 12px 0;
 }
 
 .contact-field-view {
@@ -891,7 +891,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 .contact-field-view:last-of-type {
-	margin-bottom: 16px;
+	margin-bottom: 0;
 }
 
 :root {
@@ -931,7 +931,7 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	border-bottom: 1px solid var(--background-modifier-border);
 	margin: 0;
-	padding: 0 20px;
+	padding: 16px 16px 0;
 	gap: 12px;
 }
 
@@ -977,6 +977,7 @@ If your plugin does not need CSS, delete this file.
 .contact-notes-section,
 .contact-interactions,
 .contact-extras-section {
+	padding: 12px 16px;
 	border-top: none;
 }
 
@@ -984,11 +985,151 @@ If your plugin does not need CSS, delete this file.
 @media (max-width: 600px) {
 	.contact-tabs {
 		gap: 16px;
-		padding: 0 16px;
+		padding: 16px 16px 0;
+	}
+
+	.contact-interactions-header,
+	.contact-extras-header {
+		grid-template-columns: 1fr;
+		gap: 8px;
+		margin: 12px 0 8px;
+	}
+
+	.section-helper-text {
+		text-align: center;
+	}
+
+	.contact-interactions-header .friend-tracker-button,
+	.contact-extras-header .friend-tracker-button {
+		width: 100%;
+		justify-content: center;
+	}
+
+	/* Keep all section padding consistent on mobile */
+	.contact-page-header,
+	.contact-info-section,
+	.contact-notes-section,
+	.contact-interactions,
+	.contact-extras-section,
+	.contact-content {
+		padding: 12px 16px;
 	}
 }
 
 .contact-content {
-	padding: 20px;
+	padding: 0;
 	overflow: auto;
+}
+
+/* Base button styles */
+.friend-tracker-button {
+	background: none !important;
+	border: 1px solid var(--background-modifier-border) !important;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 6px 12px;
+	font-size: 0.9em;
+	transition: all 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	border-radius: 4px;
+	-webkit-appearance: none;
+	appearance: none;
+	justify-content: center;
+	margin-top: 12px;
+}
+
+/* Button hover state */
+.friend-tracker-button:hover {
+	background: var(--background-modifier-hover) !important;
+	color: var(--text-normal);
+	border-color: var(--text-muted) !important;
+}
+
+/* Primary/accent button variant - override the border */
+.friend-tracker-button.button-primary {
+	background-color: var(--interactive-accent) !important;
+	color: var(--text-on-accent) !important;
+	border: none !important;
+}
+
+/* Remove the button-outlined class since all buttons now have borders by default */
+.friend-tracker-button.button-outlined {
+	/* Remove this class */
+}
+
+/* Icon-only button variant */
+.friend-tracker-button.button-icon {
+	padding: 4px;
+	height: 28px;
+	width: 28px;
+	justify-content: center;
+}
+
+/* Icon size for icon buttons */
+.friend-tracker-button.button-icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+/* Danger button variant */
+.friend-tracker-button.button-danger:hover {
+	color: var(--text-error);
+	background: var(--background-modifier-error-hover) !important;
+}
+
+/* Full width variant */
+.friend-tracker-button.button-full-width {
+	width: 100%;
+}
+
+/* Position modifiers */
+.button-align-right {
+	margin-left: auto;
+}
+
+/* Remove ALL old button styles */
+.contact-add-field-button,
+.contact-add-interaction-button,
+.contact-interaction-edit,
+.contact-interaction-delete,
+.contact-info-edit-button,
+.contact-info-done-button,
+.contact-extras-edit,
+.contact-name-edit,
+.friend-tracker-add-button,
+.contact-interaction-submit,
+.contact-add-field-submit {
+	/* Remove all styles */
+}
+
+/* Update tab styles to not conflict with button styles */
+.contact-tab {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 2px;
+	color: var(--text-muted);
+	font-size: 14px;
+	background: none !important;
+	box-shadow: none !important;
+	border: none;
+	border-bottom: 2px solid transparent;
+	margin-bottom: -1px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-weight: 500;
+	-webkit-appearance: none;
+	appearance: none;
+	border-radius: 0;
+}
+
+/* Style for helper text */
+.section-helper-text {
+	margin: 12px 0 8px;
+	color: var(--text-muted);
+	font-size: 0.9em;
+	line-height: 1.4;
 }

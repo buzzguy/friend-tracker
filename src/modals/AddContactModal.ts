@@ -90,7 +90,7 @@ export class AddContactModal extends Modal {
 		form.createEl("button", {
 			text: "Create contact",
 			attr: { type: "submit" },
-			cls: "friend-tracker-modal-submit",
+			cls: "friend-tracker-button button-primary",
 		});
 
 		form.addEventListener("submit", (e) => {
