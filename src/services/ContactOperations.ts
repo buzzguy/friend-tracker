@@ -121,10 +121,21 @@ export class ContactOperations {
 		}
 
 		// Format the output
-		if (days === 0) {
-			return `${years} years, ${months} months old`;
+		const parts = [];
+
+		if (years > 0) {
+			parts.push(`${years} ${years === 1 ? "year" : "years"}`);
 		}
-		return `${years} years, ${months} months, ${days} days old`;
+
+		if (months > 0) {
+			parts.push(`${months} ${months === 1 ? "month" : "months"}`);
+		}
+
+		if (days > 0) {
+			parts.push(`${days} ${days === 1 ? "day" : "days"}`);
+		}
+
+		return parts.join(", ") + " old";
 	}
 
 	private formatBirthday(dateStr: string): string {

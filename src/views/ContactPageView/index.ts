@@ -25,6 +25,7 @@ export class ContactPageView extends ItemView {
 	private contactFields: ContactFields;
 	private interactionView: InteractionView;
 	public plugin: FriendTracker;
+	private activeTab: "notes" | "interactions" | "markdown";
 
 	public getRelationshipTypes(): string[] {
 		return this.plugin.settings.relationshipTypes;
@@ -46,6 +47,7 @@ export class ContactPageView extends ItemView {
 		this.plugin = _plugin;
 		this.contactFields = new ContactFields(this);
 		this.interactionView = new InteractionView(this);
+		this.activeTab = this.plugin.settings.defaultActiveTab;
 	}
 
 	getViewType(): string {
@@ -105,28 +107,73 @@ export class ContactPageView extends ItemView {
 			return;
 		}
 
-		// Create header with editable name
+		// Header with name
 		const header = container.createEl("div", {
 			cls: "contact-page-header",
 		});
-
 		const nameContainer = header.createEl("div", {
 			cls: "contact-name-container",
 		});
-
 		this.renderNameSection(nameContainer);
 
-		// Basic Info Section
-		this.renderInfoSection(container);
+		// Info section (always visible)
+		const infoSection = container.createEl("div", {
+			cls: "contact-info-section",
+		});
+		this.renderInfoSection(infoSection);
 
-		// Notes Section
-		this.renderNotesSection(container);
+		// Tabs container
+		const tabsContainer = container.createEl("div", {
+			cls: "contact-tabs",
+		});
 
-		// Interactions Section
-		this.renderInteractionsSection(container);
+		const tabs = [
+			{ id: "notes" as const, icon: "pencil", label: "Notes" },
+			{
+				id: "interactions" as const,
+				icon: "clock",
+				label: "Interactions",
+			},
+			{
+				id: "markdown" as const,
+				icon: "document",
+				label: "Markdown",
+			},
+		];
 
-		// Extras Section
-		this.renderExtrasSection(container);
+		tabs.forEach((tab) => {
+			const tabButton = tabsContainer.createEl("button", {
+				cls: `contact-tab ${this.activeTab === tab.id ? "active" : ""}`,
+			});
+
+			setIcon(tabButton, tab.icon);
+			tabButton.createSpan({ text: tab.label });
+
+			tabButton.addEventListener("click", async () => {
+				this.activeTab = tab.id;
+				this.plugin.settings.defaultActiveTab = tab.id;
+				await this.plugin.saveSettings();
+				this.render();
+			});
+		});
+
+		// Content container for tab content
+		const contentContainer = container.createEl("div", {
+			cls: "contact-content",
+		});
+
+		// Render content based on active tab
+		switch (this.activeTab) {
+			case "notes":
+				this.renderNotesSection(contentContainer);
+				break;
+			case "interactions":
+				this.renderInteractionsSection(contentContainer);
+				break;
+			case "markdown":
+				this.renderExtrasSection(contentContainer);
+				break;
+		}
 	}
 
 	private renderNameSection(container: HTMLElement) {
@@ -154,7 +201,7 @@ export class ContactPageView extends ItemView {
 		});
 
 		const editButton = editContainer.createEl("button", {
-			cls: "contact-name-edit",
+			cls: "friend-tracker-button button-icon contact-name-edit",
 		});
 		setIcon(editButton, "pencil");
 
@@ -475,7 +522,7 @@ export class ContactPageView extends ItemView {
 
 			// Add edit button at the bottom
 			const editButton = fieldsContainer.createEl("button", {
-				cls: "contact-info-edit-button",
+				cls: "friend-tracker-button",
 				text: "Edit",
 			});
 
@@ -514,8 +561,8 @@ export class ContactPageView extends ItemView {
 
 			// Add custom field button
 			const addFieldButton = fieldsContainer.createEl("button", {
+				cls: "friend-tracker-button button-outlined",
 				text: "Add custom field",
-				cls: "contact-add-field-button",
 			});
 			addFieldButton.addEventListener("click", () => {
 				this.openAddFieldModal();
@@ -523,7 +570,7 @@ export class ContactPageView extends ItemView {
 
 			// Add done button
 			const doneButton = fieldsContainer.createEl("button", {
-				cls: "contact-info-done-button",
+				cls: "friend-tracker-button button-primary button-full-width",
 				text: "Done",
 			});
 
@@ -571,7 +618,6 @@ export class ContactPageView extends ItemView {
 		const notesSection = container.createEl("div", {
 			cls: "contact-notes-section",
 		});
-		notesSection.createEl("h2", { text: "Notes" });
 
 		const notesInput = notesSection.createEl("textarea", {
 			cls: "contact-notes-input",
@@ -606,11 +652,20 @@ export class ContactPageView extends ItemView {
 			cls: "contact-interactions-header",
 		});
 
-		headerContainer.createEl("h2", { text: "Recent interactions" });
+		// Add helper text if no interactions
+		if (
+			!Array.isArray(this.contactData.interactions) ||
+			this.contactData.interactions.length === 0
+		) {
+			headerContainer.createEl("div", {
+				cls: "section-helper-text",
+				text: "Log meaningful touchpoints like meetings, calls, or important conversations to help maintain strong relationships",
+			});
+		}
 
 		const addButton = headerContainer.createEl("button", {
+			cls: "friend-tracker-button button-align-right",
 			text: "Add interaction",
-			cls: "contact-add-interaction-button",
 		});
 		addButton.addEventListener("click", () => {
 			this.openAddInteractionModal();
@@ -635,13 +690,22 @@ export class ContactPageView extends ItemView {
 			cls: "contact-extras-header",
 		});
 
-		headerContainer.createEl("h2", { text: "Additional notes" });
+		// Add helper text if no markdown content
+		const content = await this.app.vault.read(this._file);
+		const extrasContent =
+			content.split(/^---\n([\s\S]*?)\n---/).pop() || "";
+
+		if (!extrasContent.trim()) {
+			headerContainer.createEl("div", {
+				cls: "section-helper-text",
+				text: "Add formatted text, links, and other Markdown content",
+			});
+		}
 
 		const editButton = headerContainer.createEl("button", {
-			cls: "contact-extras-edit",
-			attr: { "aria-label": "Edit in markdown" },
+			cls: "friend-tracker-button button-align-right",
+			text: "Edit markdown",
 		});
-		setIcon(editButton, "pencil");
 
 		editButton.addEventListener("click", () => {
 			this.app.workspace.openLinkText(this._file?.path || "", "", true);

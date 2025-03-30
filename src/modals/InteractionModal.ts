@@ -65,7 +65,7 @@ export class InteractionModal extends Modal {
 		form.createEl("button", {
 			text: this.interaction ? "Save changes" : "Add interaction",
 			attr: { type: "submit" },
-			cls: "contact-interaction-submit",
+			cls: "friend-tracker-button button-primary",
 		});
 	}
 
