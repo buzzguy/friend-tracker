@@ -6,6 +6,7 @@ import { VIEW_TYPE_CONTACT_PAGE } from "@/views/ContactPageView";
 import type { SortConfig, ContactWithCountdown } from "@/types";
 import { AddContactModal } from "@/modals/AddContactModal";
 import { DeleteContactModal } from "@/modals/DeleteContactModal";
+import { removeAllEventListeners } from "@/views/helpers";
 
 export const VIEW_TYPE_FRIEND_TRACKER = "friend-tracker-view";
 
@@ -106,6 +107,11 @@ export class FriendTrackerView extends ItemView {
 			this.handleVisibilityChange
 		);
 		window.removeEventListener("focus", this.handleWindowFocus);
+		// Clean up all event listeners from the main container
+		const container = this.containerEl.children[1] as HTMLElement;
+		if (container) {
+			removeAllEventListeners(container);
+		}
 	}
 
 	private handleVisibilityChange = () => {

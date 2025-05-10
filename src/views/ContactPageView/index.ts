@@ -16,6 +16,7 @@ import { InteractionModal } from "@/modals/InteractionModal";
 import { VIEW_TYPE_FRIEND_TRACKER } from "@/views/FriendTrackerView";
 import { FriendTrackerView } from "@/views/FriendTrackerView";
 import { STANDARD_FIELDS, SYSTEM_FIELDS } from "@/constants";
+import { removeAllEventListeners } from "@/views/helpers";
 
 export const VIEW_TYPE_CONTACT_PAGE = "contact-page-view";
 
@@ -846,5 +847,13 @@ export class ContactPageView extends ItemView {
 	async updateContactData(field: string, value: string) {
 		this.contactData[field] = value;
 		await this.saveContactData();
+	}
+
+	onunload() {
+		// Clean up all event listeners from the main container
+		const container = this.containerEl.children[1] as HTMLElement;
+		if (container) {
+			removeAllEventListeners(container);
+		}
 	}
 }
