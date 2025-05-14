@@ -16,7 +16,6 @@ import { InteractionModal } from "@/modals/InteractionModal";
 import { VIEW_TYPE_FRIEND_TRACKER } from "@/views/FriendTrackerView";
 import { FriendTrackerView } from "@/views/FriendTrackerView";
 import { STANDARD_FIELDS, SYSTEM_FIELDS } from "@/constants";
-import { removeAllEventListeners } from "@/views/helpers";
 
 export const VIEW_TYPE_CONTACT_PAGE = "contact-page-view";
 
@@ -80,18 +79,19 @@ export class ContactPageView extends ItemView {
 
 	async setFile(file: TFile) {
 		this._file = file;
-		if (this._file) {
-			try {
-				const content = await this.app.vault.read(file);
-				const yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
-				this.contactData = yamlMatch ? parseYaml(yamlMatch[1]) : {};
-			} catch (error) {
-				console.error(
-					`Error reading contact file ${file.path}:`,
-					error
-				);
-				this.contactData = {};
-			}
+		const currentFilePath = file.path;
+		try {
+			const content = await this.app.vault.read(file);
+			// Only update if this._file is still the same file
+			if (this._file?.path !== currentFilePath) return;
+			const yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
+			this.contactData = yamlMatch ? parseYaml(yamlMatch[1]) : {};
+		} catch (error) {
+			console.error(`Error reading contact file ${file.path}:`, error);
+			this.contactData = {};
+		}
+		// Only render if still the same file
+		if (this._file?.path === currentFilePath) {
 			this.render();
 		}
 	}
@@ -847,13 +847,5 @@ export class ContactPageView extends ItemView {
 	async updateContactData(field: string, value: string) {
 		this.contactData[field] = value;
 		await this.saveContactData();
-	}
-
-	onunload() {
-		// Clean up all event listeners from the main container
-		const container = this.containerEl.children[1] as HTMLElement;
-		if (container) {
-			removeAllEventListeners(container);
-		}
 	}
 }
