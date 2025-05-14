@@ -127,4 +127,12 @@ export default class FriendTracker extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
+	async onunload() {
+		// Remove the datalist from document.body if it exists
+		const datalist = document.getElementById("relationship-types");
+		if (datalist) {
+			datalist.remove();
+		}
+	}
 }

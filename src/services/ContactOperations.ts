@@ -65,10 +65,18 @@ export class ContactOperations {
 	private calculateAge(birthday: string): number | null {
 		if (!birthday) return null;
 
-		const birthDate = new Date(birthday);
+		// Parse the birthday and set it to local midnight
+		const [birthYear, birthMonth, birthDay] = birthday
+			.split("-")
+			.map(Number);
+		const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+		birthDate.setHours(0, 0, 0, 0);
+
 		if (isNaN(birthDate.getTime())) return null;
 
 		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
 		let age = today.getFullYear() - birthDate.getFullYear();
 		const monthDiff = today.getMonth() - birthDate.getMonth();
 

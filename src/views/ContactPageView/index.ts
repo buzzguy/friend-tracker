@@ -79,18 +79,19 @@ export class ContactPageView extends ItemView {
 
 	async setFile(file: TFile) {
 		this._file = file;
-		if (this._file) {
-			try {
-				const content = await this.app.vault.read(file);
-				const yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
-				this.contactData = yamlMatch ? parseYaml(yamlMatch[1]) : {};
-			} catch (error) {
-				console.error(
-					`Error reading contact file ${file.path}:`,
-					error
-				);
-				this.contactData = {};
-			}
+		const currentFilePath = file.path;
+		try {
+			const content = await this.app.vault.read(file);
+			// Only update if this._file is still the same file
+			if (this._file?.path !== currentFilePath) return;
+			const yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
+			this.contactData = yamlMatch ? parseYaml(yamlMatch[1]) : {};
+		} catch (error) {
+			console.error(`Error reading contact file ${file.path}:`, error);
+			this.contactData = {};
+		}
+		// Only render if still the same file
+		if (this._file?.path === currentFilePath) {
 			this.render();
 		}
 	}
