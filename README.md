@@ -4,7 +4,7 @@ A plugin for Obsidian that helps you keep track of friends, family, and your int
 
 ## Inspiration
 
-This plugin was inspired by [Scott Stockdale's article on maintaining meaningful friendships](https://entrepreneurscanparty.com/posts/how-to-be-a-more-awesome-friend). The core idea is that maintaining strong relationships requires a system for:
+This plugin was inspired by [Scott Stockdale's article on maintaining meaningful friendships](https://web.archive.org/web/20250409205126/https://entrepreneurscanparty.com/posts/how-to-be-a-more-awesome-friend). The core idea is that maintaining strong relationships requires a system for:
 
 -   Tracking important dates and milestones
 -   Recording meaningful interactions
